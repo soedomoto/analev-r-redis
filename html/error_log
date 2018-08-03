@@ -1,0 +1,43 @@
+[19-Mar-2018 09:38:49 Asia/Jakarta] PHP Fatal error:  Call to undefined function assets_url() in /home/pti/public_html/inspectorate/app/application/views/templates/header.php on line 10
+[19-Mar-2018 09:39:09 Asia/Jakarta] PHP Fatal error:  Call to undefined function assets_url() in /home/pti/public_html/inspectorate/app/application/views/templates/header.php on line 10
+[19-Mar-2018 09:39:32 Asia/Jakarta] PHP Fatal error:  Call to undefined function assets_url() in /home/pti/public_html/inspectorate/app/application/views/templates/header.php on line 10
+[19-Mar-2018 09:41:04 Asia/Jakarta] PHP Fatal error:  Call to undefined function assets_url() in /home/pti/public_html/inspectorate/app/application/views/templates/header.php on line 10
+[19-Mar-2018 09:45:25 Asia/Jakarta] PHP Fatal error:  Call to undefined function assets_url() in /home/pti/public_html/inspectorate/app/application/controllers/Home.php on line 25
+[19-Mar-2018 12:02:41 Asia/Jakarta] PHP Parse error:  syntax error, unexpected '[' in /home/pti/public_html/inspectorate/app/application/controllers/User.php on line 69
+[19-Mar-2018 12:03:04 Asia/Jakarta] PHP Fatal error:  Call to undefined function baseurl() in /home/pti/public_html/inspectorate/app/application/controllers/User.php on line 69
+[28-Mar-2018 11:08:41 Asia/Jakarta] PHP Fatal error:  Call to undefined function assets_url() in /home/pti/public_html/360_v2/app/application/views/templates/header.php on line 10
+[28-Mar-2018 14:13:46 Asia/Jakarta] PHP Fatal error:  Call to undefined function assets_url() in /home/pti/public_html/360_v2/app/application/views/templates/header.php on line 10
+[28-Mar-2018 14:16:02 Asia/Jakarta] PHP Fatal error:  Call to undefined function assets_url() in /home/pti/public_html/360_v2/app/application/views/templates/header.php on line 10
+[28-Mar-2018 14:16:51 Asia/Jakarta] PHP Fatal error:  Call to undefined function assets_url() in /home/pti/public_html/360_v2/app/application/views/templates/header.php on line 10
+[28-Mar-2018 14:18:21 Asia/Jakarta] PHP Fatal error:  Cannot use $this as lexical variable in /home/pti/public_html/360_v2/app/application/controllers/Admin.php on line 26
+[28-Mar-2018 14:19:02 Asia/Jakarta] PHP Fatal error:  Call to undefined function assets_url() in /home/pti/public_html/360_v2/app/application/views/templates/header.php on line 10
+[28-Mar-2018 14:20:40 Asia/Jakarta] PHP Fatal error:  Call to undefined function assets_url() in /home/pti/public_html/360_v2/app/application/views/templates/header.php on line 10
+[28-Mar-2018 14:21:29 Asia/Jakarta] PHP Fatal error:  Call to undefined function assets_url() in /home/pti/public_html/360_v2/app/application/views/templates/header.php on line 10
+[28-Mar-2018 14:24:06 Asia/Jakarta] PHP Fatal error:  Call to undefined function assets_url() in /home/pti/public_html/360_v2/app/application/views/templates/header.php on line 10
+[03-Apr-2018 09:48:53 Asia/Jakarta] PHP Parse error:  syntax error, unexpected T_DOUBLE_ARROW in /home/pti/public_html/360_v2/app/application/controllers/User.php on line 11
+[03-Apr-2018 09:49:13 Asia/Jakarta] PHP Parse error:  syntax error, unexpected T_DOUBLE_ARROW in /home/pti/public_html/360_v2/app/application/controllers/User.php on line 11
+[03-Apr-2018 13:23:55 Asia/Jakarta] PHP Fatal error:  Cannot use object of type stdClass as array in /home/pti/public_html/360_v2/app/application/views/home/menu.php on line 54
+[03-Apr-2018 13:24:01 Asia/Jakarta] PHP Fatal error:  Cannot use object of type stdClass as array in /home/pti/public_html/360_v2/app/application/views/home/menu.php on line 54
+[03-Apr-2018 13:24:09 Asia/Jakarta] PHP Fatal error:  Cannot use object of type stdClass as array in /home/pti/public_html/360_v2/app/application/views/home/menu.php on line 54
+[03-Apr-2018 13:24:19 Asia/Jakarta] PHP Fatal error:  Cannot use object of type stdClass as array in /home/pti/public_html/360_v2/app/application/views/home/menu.php on line 54
+[03-Apr-2018 13:24:35 Asia/Jakarta] PHP Fatal error:  Cannot use object of type stdClass as array in /home/pti/public_html/360_v2/app/application/views/home/menu.php on line 54
+[03-Apr-2018 13:24:46 Asia/Jakarta] PHP Fatal error:  Cannot use object of type stdClass as array in /home/pti/public_html/360_v2/app/application/views/home/menu.php on line 54
+[03-Apr-2018 13:25:06 Asia/Jakarta] PHP Fatal error:  Cannot use object of type stdClass as array in /home/pti/public_html/360_v2/app/application/views/home/menu.php on line 54
+[03-Apr-2018 14:17:17 Asia/Jakarta] PHP Fatal error:  Cannot use object of type stdClass as array in /home/pti/public_html/360_v2/app/application/views/home/menu.php on line 54
+[03-Apr-2018 14:27:08 Asia/Jakarta] PHP Fatal error:  Cannot use object of type stdClass as array in /home/pti/public_html/360_v2/app/application/views/home/menu.php on line 54
+[12-Apr-2018 13:03:54 Asia/Jakarta] PHP Fatal error:  Maximum execution time of 30 seconds exceeded in /home/pti/public_html/360_v2/system/libraries/Session/drivers/Session_files_driver.php on line 263
+[17-Apr-2018 08:25:03 Asia/Jakarta] PHP Parse error:  syntax error, unexpected '=' in /home/pti/public_html/360_v2/app/application/controllers/User.php on line 25
+[19-Apr-2018 09:46:10 Asia/Jakarta] PHP Parse error:  syntax error, unexpected '[', expecting T_VARIABLE or '$' in /home/pti/public_html/360_v2/app/application/controllers/User.php on line 110
+[07-May-2018 14:30:43 Asia/Jakarta] PHP Fatal error:  Call to undefined method Home::response() in /home/pti/public_html/360_v2/app/application/controllers/Home.php on line 77
+[11-May-2018 14:23:45 Asia/Jakarta] PHP Fatal error:  Call to undefined method Home::response() in /home/pti/public_html/360_v2/app/application/controllers/Home.php on line 77
+[11-May-2018 14:23:52 Asia/Jakarta] PHP Fatal error:  Call to undefined method Home::response() in /home/pti/public_html/360_v2/app/application/controllers/Home.php on line 77
+[11-May-2018 14:24:37 Asia/Jakarta] PHP Fatal error:  Call to undefined method Home::response() in /home/pti/public_html/360_v2/app/application/controllers/Home.php on line 77
+[21-May-2018 14:48:14 Asia/Jakarta] PHP Fatal error:  Call to undefined method Home::response() in /home/pti/public_html/360_v2/app/application/controllers/Home.php on line 77
+[22-May-2018 09:30:25 Asia/Jakarta] PHP Fatal error:  Call to undefined method Home::response() in /home/pti/public_html/360_v2/app/application/controllers/Home.php on line 77
+[22-May-2018 10:08:51 Asia/Jakarta] PHP Fatal error:  Call to undefined method Home::response() in /home/pti/public_html/360_v2/app/application/controllers/Home.php on line 77
+[23-May-2018 08:54:31 Asia/Jakarta] PHP Fatal error:  Call to undefined method Home::response() in /home/pti/public_html/360_v2/app/application/controllers/Home.php on line 77
+[23-May-2018 08:57:49 Asia/Jakarta] PHP Fatal error:  Call to undefined method Home::response() in /home/pti/public_html/360_v2/app/application/controllers/Home.php on line 77
+[23-May-2018 09:07:36 Asia/Jakarta] PHP Fatal error:  Call to undefined method Home::response() in /home/pti/public_html/360_v2/app/application/controllers/Home.php on line 77
+[24-May-2018 15:43:44 Asia/Jakarta] PHP Fatal error:  Call to undefined method Home::response() in /home/pti/public_html/360_v2/app/application/controllers/Home.php on line 77
+[30-May-2018 07:39:56 Asia/Jakarta] PHP Fatal error:  Call to undefined method Home::response() in /home/pti/public_html/360_v2/app/application/controllers/Home.php on line 77
+[30-May-2018 07:40:07 Asia/Jakarta] PHP Fatal error:  Call to undefined method Home::response() in /home/pti/public_html/360_v2/app/application/controllers/Home.php on line 77

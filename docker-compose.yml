@@ -1,0 +1,37 @@
+version: '2'
+
+services:
+  redis:
+    image: redis:4-alpine
+    ports:
+      - "6379:6379"
+
+  webdis:
+    image: anapsix/webdis:latest
+    depends_on:
+      - redis
+    links:
+      - redis:redis
+    ports:
+      - "7379:7379"
+
+  php:
+    image: ulsmith/alpine-apache-php7
+    depends_on:
+      - webdis
+    volumes:
+      - ./html:/app/public
+    ports:
+      - "8888:80"
+
+  worker:
+    build: worker
+    depends_on:
+      - redis
+    links:
+      - redis:redis
+    volumes:
+      - ./worker:/app
+    environment:
+      - REDIS_HOST=redis
+    command: "Rscript /app/manager.R"
