@@ -173,54 +173,147 @@
 </script>
 
 <script type="text/javascript">
-    window.sess=uuid();
+    window.sess_id = uuid();
 
-    function capture_result(url) {
-        ajax_get(url, function (j_resp, retry_url) {
-            Object.keys(j_resp).forEach(function (op) {
-                var resp = j_resp[op];
-                if (resp == null) {
-                    console.log('Timeout. Retrying...');
-                    capture_result(retry_url);
-                } else {
-                    var resp = resp[1], 
-                        resp = JSON.parse(resp), 
-                        _sess = resp.session, 
-                        _id = resp.id, 
-                        _data = resp.data, 
-                        _is_err = resp.error;
-
-                    console.log(_sess, _id, _data, _is_err);
-                }
-            });
-        });
-    }
-
-    function cmd_eval(cmd) {
-        id = uuid();
-        cmd = encodeURI(cmd);
-        req = JSON.stringify({
-            'sess': window.sess, 'id': id, 'cmd': cmd
+    function _send_cmd_request(req_id, cmd, callback) {
+        message = JSON.stringify({
+            'sess': window.sess_id, 'id': req_id, 'cmd': cmd 
         });
 
-        // if (! ('sessions' in window)) window.sessions = {};
-        // if (! (sess in window.sessions)) window.sessions[window.sess] = {};
-        // window.sessions[window.sess]['req'] = req;
-        // window.sessions[window.sess]['resp'] = function(sess, val) {
-        //     console.log(window.sess, val)
-        // };
+        ajax_get('http://127.0.0.1:7379/LPUSH/req/' + encodeURIComponent(message), function (j_resp, s_url) {
+            var parts = s_url.split('/'), 
+                data = parts[parts.length-1], 
+                data = decodeURIComponent(data), 
+                data = JSON.parse(data), 
+                req_id = data.id;
 
-        capture_result('http://127.0.0.1:7379/BLPOP/resp.' + id + '/timeout/30');
-
-        ajax_get('http://127.0.0.1:7379/RPUSH/inp/' + req, function (j_resp, s_url) {
             Object.keys(j_resp).forEach(function (op) {
                 var val = parseInt(j_resp[op]);
                 if (val <= 0) {
                     console.log('Command failed to execute')
+                } else {
+                    callback(req_id);
                 }
             });
         });
     }
+
+    function _send_rpc_request(req_id, func_name, params, callback) {
+        message = JSON.stringify({
+            'sess': window.sess_id, 'id': req_id, 'func': func_name, 'args': params
+        });
+
+        ajax_get('http://127.0.0.1:7379/LPUSH/req/' + encodeURIComponent(message), function (j_resp, s_url) {
+            var parts = s_url.split('/'), 
+                data = parts[parts.length-1], 
+                data = decodeURIComponent(data), 
+                data = JSON.parse(data), 
+                req_id = data.id;
+
+            Object.keys(j_resp).forEach(function (op) {
+                var val = parseInt(j_resp[op]);
+                if (val <= 0) {
+                    console.log('Command failed to execute')
+                } else {
+                    callback(req_id);
+                }
+            });
+        });
+    }
+
+    function _wait_for_response(req_id) {
+        ajax_get('http://127.0.0.1:7379/BLPOP/resp-' + req_id + '/timeout/30', function (j_resp, s_url) {
+            var parts = s_url.split('/'), 
+                req_id = parts.filter(function (part) {
+                    if (part.includes('resp-')) return true;
+                    return false;
+                })[0].replace('resp-', '');
+
+            Object.keys(j_resp).forEach(function (op) {
+                var resp = j_resp[op];
+                if (resp == null) {
+                    console.log('Timeout. Retrying...');
+                    _wait_for_response(req_id);
+                } else {
+                    if(req_id in window.req_callbacks) {
+                        window.req_callbacks[req_id](req_id, resp[1]);
+                        delete window.req_callbacks[req_id];
+                    }
+                }
+            });
+        });
+    }
+
+    function eval(cmd, callback) {
+        req_id = uuid();
+
+        if (! ('req_callbacks' in window)) window.req_callbacks = {};
+        if (callback) window.req_callbacks[req_id] = callback;
+
+        _send_cmd_request(req_id, cmd, function(_req_id) {
+            _wait_for_response(_req_id);
+        });
+    }
+
+    function call(func_name, json_params=[], callback) {
+        req_id = uuid();
+
+        if (! ('req_callbacks' in window)) window.req_callbacks = {};
+        if (callback) window.req_callbacks[req_id] = callback;
+
+        _send_rpc_request(req_id, func_name, json_params, function(_req_id) {
+            _wait_for_response(_req_id);
+        });
+    }
+
+
+
+    // function capture_result(url) {
+    //     ajax_get(url, function (j_resp, retry_url) {
+    //         Object.keys(j_resp).forEach(function (op) {
+    //             var resp = j_resp[op];
+    //             if (resp == null) {
+    //                 console.log('Timeout. Retrying...');
+    //                 capture_result(retry_url);
+    //             } else {
+    //                 var resp = resp[1], 
+    //                     resp = JSON.parse(resp), 
+    //                     _sess = resp.session, 
+    //                     _id = resp.id, 
+    //                     _data = resp.data, 
+    //                     _is_err = resp.error;
+
+    //                 console.log(_sess, _id, _data, _is_err);
+    //             }
+    //         });
+    //     });
+    // }
+
+    // function cmd_eval(cmd) {
+    //     id = uuid();
+    //     cmd = encodeURI(cmd);
+    //     req = JSON.stringify({
+    //         'sess': window.sess_id, 'id': id, 'cmd': cmd
+    //     });
+
+    //     // if (! ('sessions' in window)) window.sess_idions = {};
+    //     // if (! (sess in window.sess_idions)) window.sess_idions[window.sess_id] = {};
+    //     // window.sess_idions[window.sess_id]['req'] = req;
+    //     // window.sess_idions[window.sess_id]['resp'] = function(sess, val) {
+    //     //     console.log(window.sess_id, val)
+    //     // };
+
+    //     capture_result('http://127.0.0.1:7379/BLPOP/resp.' + id + '/timeout/30');
+
+    //     ajax_get('http://127.0.0.1:7379/RPUSH/inp/' + req, function (j_resp, s_url) {
+    //         Object.keys(j_resp).forEach(function (op) {
+    //             var val = parseInt(j_resp[op]);
+    //             if (val <= 0) {
+    //                 console.log('Command failed to execute')
+    //             }
+    //         });
+    //     });
+    // }
 
     $(function () {
         

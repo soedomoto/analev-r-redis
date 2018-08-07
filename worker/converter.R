@@ -4,6 +4,13 @@ process.dataframe <- function(resp) {
     return(str.table)
 }
 
+process.dataframe.to.csv <- function(resp) {
+    zz <- textConnection("foo1", "w") 
+    write.csv(resp, zz) 
+    csv.str <- textConnectionValue(zz) 
+    return(csv.str)
+}
+
 process.response <- function(resp, err_code) {
     library(jsonlite)
 
@@ -12,7 +19,7 @@ process.response <- function(resp, err_code) {
 
     if (is.data.frame(resp)) {
         dtype <- 'table'
-        dresp <- process.dataframe(resp)
+        dresp <- process.dataframe.to.csv(resp)
     }
 
     else if(file.exists("tmp.png") && err_code == 0) {

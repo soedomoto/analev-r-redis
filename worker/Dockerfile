@@ -11,3 +11,9 @@ RUN apt-get update \
 
 RUN Rscript -e "install.packages(c('devtools', 'redux', 'reticulate', 'processx'))"
 RUN Rscript -e "install.packages(c('XML', 'xtable', 'foreign', 'base64enc', 'tidyverse', 'dplyr', 'ggplot2'))"
+
+RUN apt-get update \
+    && apt-get install -y libmariadbclient-dev \
+    && rm -rf /var/lib/apt/lists/*
+    
+RUN Rscript -e "install.packages(c('RMySQL'))"

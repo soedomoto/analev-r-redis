@@ -24,14 +24,45 @@ services:
     ports:
       - "8888:80"
 
+  mysql:
+    image: mysql:5.7
+    environment:
+      - MYSQL_ROOT_PASSWORD=toor
+      - MySQL_USER=analev
+      - MySQL_PASSWORD=velana
+      - MYSQL_DATABASE=analev
+    ports:
+      - "3316:3306"
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:4.7
+    hostname: phpmyadmin
+    environment:
+      - PMA_USER=root
+      - PMA_PASSWORD=toor
+    depends_on:
+        - mysql
+    links:
+      - mysql:db
+    ports:
+      - "8889:80"
+
   worker:
     build: worker
     depends_on:
       - redis
+      - mysql
     links:
       - redis:redis
+      - mysql:db
     volumes:
       - ./worker:/app
+      - /media/soedomoto/DATA/PROJECT/2018-analevR/data:/data
+      - ./workspace:/workspace
     environment:
       - REDIS_HOST=redis
+      - MySQL_USER=root
+      - MySQL_PASSWORD=toor
+      - MYSQL_DATABASE=analev
+      - MYSQL_HOST=db
     command: "Rscript /app/manager.R"
