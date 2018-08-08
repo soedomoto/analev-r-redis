@@ -88,7 +88,7 @@ while(1) {
             resp.obj <<- capture.output(e)
         })
 
-        resp.str <- toJSON(list('session'=req.sess, 'id'=req.id, 'data'=resp.obj, 'error'=err.code))
+        resp.str <- toJSON(list('session'=req.sess, 'id'=req.id, 'data'=resp.obj, 'error'=err.code), auto_unbox=TRUE, force=TRUE)
         conn$LPUSH(paste0("resp-", req.id), resp.str)
 
         # Save session for next purpose
