@@ -186,11 +186,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.9/summernote.js"></script>
     <!-- sidebar -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.nanoscroller/0.8.4/javascripts/jquery.nanoscroller.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/4.6.0/papaparse.min.js"></script>
     <!-- LZW -->
     <script src="<?php echo assets_url() ?>/lzw/lzw.js"></script>
-    <script src="<?php echo assets_url() ?>/webstrotadmin/js/lib/menubar/sidebar.js"></script>
-    <!-- Script -->
-    <script src="<?php echo assets_url() ?>/webstrotadmin/js/scripts.js"></script>
 </body>
 
 </html>
