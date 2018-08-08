@@ -222,7 +222,7 @@
     }
 
     function _wait_for_response(req_id) {
-        ajax_get('http://127.0.0.1:7379/BLPOP/resp-' + req_id + '/timeout/30', function (j_resp, s_url) {
+        ajax_get('http://127.0.0.1:7379/BRPOP/resp-' + req_id + '/timeout/30', function (j_resp, s_url) {
             var parts = s_url.split('/'), 
                 req_id = parts.filter(function (part) {
                     if (part.includes('resp-')) return true;

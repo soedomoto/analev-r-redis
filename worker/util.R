@@ -4,5 +4,7 @@ Sys_getenv <- function(x, unset = NULL) {
 }
 
 data.path <- function(data.name) {
-    return(paste0('/data/', data.name))
+    data.dir <- Sys.getenv('DATA_DIR', '/data')
+    data.file <- normalizePath(file.path(data.dir, data.name))
+    return(data.file)
 }

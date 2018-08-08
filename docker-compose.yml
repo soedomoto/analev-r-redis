@@ -60,9 +60,13 @@ services:
       - /media/soedomoto/DATA/PROJECT/2018-analevR/data:/data
       - ./workspace:/workspace
     environment:
+      - APP_DIR=/app
+      - WORKSPACE_DIR=/workspace
+      - DATA_DIR=/data
       - REDIS_HOST=redis
       - MySQL_USER=root
       - MySQL_PASSWORD=toor
       - MYSQL_DATABASE=analev
       - MYSQL_HOST=db
+    pid: "host"
     command: "Rscript /app/manager.R"

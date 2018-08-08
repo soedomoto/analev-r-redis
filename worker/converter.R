@@ -8,6 +8,7 @@ process.dataframe.to.csv <- function(resp) {
     zz <- textConnection("foo1", "w") 
     write.csv(resp, zz) 
     csv.str <- textConnectionValue(zz) 
+    close(zz)
     return(csv.str)
 }
 
