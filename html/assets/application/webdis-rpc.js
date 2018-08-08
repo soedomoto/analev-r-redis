@@ -112,7 +112,7 @@ function _wait_for_response(req_id) {
     });
 }
 
-function eval(cmd, callback) {
+function analev_eval(cmd, callback) {
     req_id = uuid();
 
     if (! ('req_callbacks' in window)) window.req_callbacks = {};
@@ -123,7 +123,7 @@ function eval(cmd, callback) {
     });
 }
 
-function call(func_name, json_params=[], callback) {
+function analev_call(func_name, json_params=[], callback) {
     req_id = uuid();
 
     if (! ('req_callbacks' in window)) window.req_callbacks = {};

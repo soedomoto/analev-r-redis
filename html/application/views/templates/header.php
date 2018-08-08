@@ -28,7 +28,6 @@
     
     <!-- JQuery -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
-    <script src="<?php echo assets_url() ?>/application/webdis-rpc.js"></script>
     
     <style type="text/css">
         html, body {
