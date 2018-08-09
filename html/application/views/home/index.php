@@ -63,7 +63,7 @@
 <script type="text/javascript">
     $(function() {
         window.webdis_url = 'http://127.0.0.1:7379';
-        window.session_id = uuid();
+        window.session_id = '7c3fc291-ea44-4a47-1ef7-3f858a2de404'; //uuid();
 
         // Hide loading page indicator
         $('.loading-modal').addClass('animated').css('z-index', -1);

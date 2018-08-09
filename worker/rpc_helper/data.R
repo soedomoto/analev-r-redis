@@ -2,6 +2,7 @@ data.get_catalogues <- function() {
     library(RMySQL)
 
     db <- dbConnect(MySQL(), user=Sys_getenv("MYSQL_USER", 'root'), password=Sys_getenv("MYSQL_PASSWORD", 'toor'), dbname=Sys_getenv("MYSQL_DATABASE", 'analev'), host=Sys_getenv("MYSQL_HOST", '127.0.0.1'))
+    on.exit(dbDisconnect(db))
     rs <- dbSendQuery(db, 'SELECT id, label FROM data_model')
     rows <- dbFetch(rs)
 
@@ -17,7 +18,7 @@ data.read <- function(cat.id, var.name) {
     row <- dbFetch(rs)
 
     df <- eval(parse(text=paste(var.name, '<<-', str_replace(row$r_handler, "\\?", paste0('"', row$location, '"')))))
-    csv <- process.dataframe.to.csv(df)
+    csv <- process.dataframe.to.csv(head(df))
 
     return(csv)
 }

@@ -5,16 +5,37 @@ class DataSelectorApp extends React.Component {
     this.selector_modal__show = this.selector_modal__show.bind(this);
 
     this.state = {
-      datasets: [], 
+      dataset_initialized: false, 
+      datasets: {}, 
       selector_modal__is_shown: false, 
-      selector_modal__datasets: []
     };
   }
 
+  initializing() {
+    console.log('initializing')
+    var _this = this;
+
+    analev_call('data.get_catalogues', [], function(req_id, resp) {
+      resp = JSON.parse(resp);
+      if (resp.success) {
+        _this.setState({
+          datasets: resp.data.reduce((obj, d) => {
+            d.selected = false;
+            obj[d.id] = d;
+            return obj;
+          }, {}), 
+          dataset_initialized: true
+        });
+      }
+    });
+  }
+
   render() {
+    if (! this.state.dataset_initialized) this.initializing();
+
     return React.createElement('div', {}, 
       React.createElement('h3', {}, 'Dataset'), 
-      React.createElement(DataSelectorApp_SelectedDatasets, { items: this.state.datasets }), 
+      React.createElement(DataSelectorApp_SelectedDatasets, {datasets: this.state.datasets}), 
       React.createElement('div', { className: 'text-center' }, 
         React.createElement(ReactBootstrap.Button, { 
           bsStyle: 'primary', 
@@ -38,11 +59,14 @@ class DataSelectorApp extends React.Component {
       ), 
       React.createElement(ReactBootstrap.Modal.Body, {}, 
         React.createElement(ReactBootstrap.ListGroup, {}, 
-          this.state.selector_modal__datasets.map(d => 
-            React.createElement(DataSelectorApp_Dataset, {
-              data: d, 
-              on_selected: function(_d) {
-                console.log(_d)
+          Object.keys(this.state.datasets).map((id, idx) => 
+            React.createElement(DataSelectorApp_Dataset, { 
+              dataset: this.state.datasets[id], 
+              index: idx, 
+              key: id, 
+              on_selected: (_id, _data) => {
+                this.state.datasets[_id]['data'] = _data;
+                this.forceUpdate();
               }
             })
           )
@@ -64,42 +88,51 @@ class DataSelectorApp extends React.Component {
     this.setState({ selector_modal__is_shown: false });
   }
 
-  selector_modal__on_entering() {
-    var datasets = [
-      {id: 1, name: 'Asdf'}
-    ];
+  selector_modal__on_entering() {}
+}
 
-    this.setState({
-      selector_modal__datasets: datasets
-    });
+class DataSelectorApp_SelectedDatasets extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {}
+  }
 
-    // analev_call('data.get_catalogues', [], function(req_id, resp) {
-
-    // })
+  render() {
+    return React.createElement('div', { className: 'panel panel-default' }, 
+      React.createElement('table', { className: 'table table-bordered' }, 
+        React.createElement('tbody', {}, 
+          Object.keys(this.props.datasets).map(idx => 
+            React.createElement('tr', { key: idx })
+          )
+        )
+      )
+    );
   }
 }
 
 class DataSelectorApp_Dataset extends React.Component {
   constructor(props) {
     super(props);
+
     this.state = {};
   }
 
   render() {
     return React.createElement(ReactBootstrap.ListGroupItem, {
-      key: 'lg_' + this.props.data.id, 
+      key: this.props.dataset.id, 
       href: '#', 
-      onClick: () => this.props.on_selected(this)
-    }, this.props.data.name)
+      onClick: () => this.dataset__on_selected()
+    }, this.props.dataset.label)
   }
-}
 
-class DataSelectorApp_SelectedDatasets extends React.Component {
-  render() {
-    return React.createElement('ul', {}, 
-      this.props.items.map(item => 
-        React.createElement('li', { key: item.id }, item.text)
-      )
-    );
+  dataset__on_selected() {
+    var _self = this;
+
+    analev_call('data.read', [this.props.dataset.id, 'df' + _self.props.index], function(req_id, resp) {
+      resp = JSON.parse(resp);
+      if (resp.success) {
+        if (_self.props.on_selected) _self.props.on_selected(_self.props.dataset.id, Papa.parse(resp.data))
+      }
+    })
   }
 }

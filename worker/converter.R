@@ -1,15 +1,21 @@
 process.dataframe <- function(resp) {
     library(xtable)
+
     str.table <- print(xtable(resp), type='html')
     return(str.table)
 }
 
 process.dataframe.to.csv <- function(resp) {
-    zz <- textConnection("foo1", "w") 
-    write.csv(resp, zz) 
-    csv.str <- textConnectionValue(zz) 
-    close(zz)
-    return(csv.str)
+    library(readr)
+
+    write.table(resp, row.names=FALSE, na="", sep=",", file=".tmp.csv")
+    return(read_file(".tmp.csv"))
+
+    # zz <- textConnection("foo1", "w") 
+    # write.csv(resp, zz) 
+    # csv.str <- textConnectionValue(zz) 
+    # close(zz)
+    # return(csv.str)
 }
 
 process.response <- function(resp, err_code) {
