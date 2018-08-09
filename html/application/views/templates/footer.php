@@ -189,17 +189,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/4.6.0/papaparse.min.js"></script>
     <!-- LZW -->
     <script src="<?php echo assets_url() ?>/lzw/lzw.js"></script>
-
-
-    <!-- <script src="https://unpkg.com/react@16/umd/react.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js" crossorigin></script> -->
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/16.4.2/umd/react.development.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/16.4.2/umd/react-dom.development.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-bootstrap/0.32.1/react-bootstrap.min.js"></script>
-
     <script src="<?php echo assets_url() ?>/application/webdis-rpc.js"></script>
-    <script src="<?php echo assets_url() ?>/application/application.js"></script>
 </body>
 
 </html>

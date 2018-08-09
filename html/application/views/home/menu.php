@@ -1,5 +1,5 @@
 <div class="navbar navbar-fixed-top user-menu" style="background: #fff;">
-    <div class="container">
+    <div class="container-fluid">
         <div class="navbar-header">
             <a href="." class="navbar-brand"><img src="<?php echo assets_url(); ?>/logo.png"></a>
 

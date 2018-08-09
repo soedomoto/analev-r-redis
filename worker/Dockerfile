@@ -17,3 +17,5 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
     
 RUN Rscript -e "install.packages(c('RMySQL'))"
+RUN Rscript -e "install.packages(c('readr'))"
+RUN Rscript -e "install.packages(c('dplyr'))"

@@ -29,13 +29,13 @@
                 </div>
             </div>
 
-            <div id="main-content">
+            <div id="main_content">
                 <div class="row">
                     <!-- Left panel -->
-                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                         <div class="card alert">
                             <div class="card-header">
-                                <h4>Pilih Data</h4>
+                                <h4>Dataset</h4>
                             </div>
                             <div class="card-body">
                                 <div id="dataset_selector"></div>
@@ -44,7 +44,7 @@
                     </div>
             
                     <!-- Main panel -->
-                    <div class="col-lg-9 col-md-9 col-sm-12 col-xs-12">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                         <div class="card alert">
                             <div class="card-header">
                                 <h4>Masukkan Parameter</h4>
@@ -60,6 +60,9 @@
     </div>
 </div>
 
+<script src="<?php echo assets_url() ?>/application/data_selector_app.js"></script>
+<script src="<?php echo assets_url() ?>/application/main_app.js"></script>
+
 <script type="text/javascript">
     $(function() {
         window.webdis_url = 'http://127.0.0.1:7379';
@@ -68,7 +71,7 @@
         // Hide loading page indicator
         $('.loading-modal').addClass('animated').css('z-index', -1);
 
-        ReactDOM.render(React.createElement(DataSelectorApp, {}), $('#dataset_selector')[0]);
+        ReactDOM.render(React.createElement(MainApp, {}), $('#main_content')[0]);
     });
 </script>
 
