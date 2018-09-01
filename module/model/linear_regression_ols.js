@@ -101,100 +101,96 @@ window.LinearRegressionOLS = class extends BaseModule {
 
   process_summarize() {
   	var _this = this;
-    var cmd = `
-      # library(...) \n
+    var cmds = [
+      `
+        library(broom) \n
+        library(dplyr) \n
+        library(magrittr) \n
 
-      int <- ""\n
-      dataset <- {0}\n
-      r_var <- "{1}"\n
-      e_vars <- "{2}"\n
-      dataset_name <- "{3}"\n
-      dataset <- get_data(dataset, c(r_var, e_vars))\n
+        int <- ""\n
+        dataset <- {0}\n
+        r_var <- "{1}"\n
+        e_vars <- "{2}"\n
+        dataset_name <- "{3}"\n
+        dataset <- get_data(dataset, c(r_var, e_vars))\n
 
-      var_check <- function(ev, cn, intv = "") {\n
-        vars <- ev\n
-        if (length(vars) < length(cn)) vars <- ev <- cn\n
+        var_check <- function(ev, cn, intv = "") {\n
+          vars <- ev\n
+          if (length(vars) < length(cn)) vars <- ev <- cn\n
 
-        if (intv != "" && length(vars) > 1) {\n
-          if ({\n
-            intv %>% strsplit(":") %>% unlist()\n
-          } %in% vars %>% all()) {\n
-            vars <- c(vars, intv)\n
-          } else {\n
-            intv <- ""\n
+          if (intv != "" && length(vars) > 1) {\n
+            if ({\n
+              intv %>% strsplit(":") %>% unlist()\n
+            } %in% vars %>% all()) {\n
+              vars <- c(vars, intv)\n
+            } else {\n
+              intv <- ""\n
+            }\n
           }\n
+
+          list(vars = vars, ev = ev, intv = intv)\n
         }\n
 
-        list(vars = vars, ev = ev, intv = intv)\n
-      }\n
+        minmax <- function(dataset) {\n
+          isNum <- sapply(dataset, is.numeric)\n
+          if (sum(isNum) == 0) return(dataset)\n
+          cn <- names(isNum)[isNum]\n
 
-      minmax <- function(dataset) {\n
-        isNum <- sapply(dataset, is.numeric)\n
-        if (sum(isNum) == 0) return(dataset)\n
-        cn <- names(isNum)[isNum]\n
+          mn <- summarise_at(dataset, .vars = cn, .funs = funs(min(., na.rm = TRUE)))\n
+          mx <- summarise_at(dataset, .vars = cn, .funs = funs(max(., na.rm = TRUE)))\n
 
-        mn <- summarise_at(dataset, .vars = cn, .funs = funs(min(., na.rm = TRUE)))\n
-        mx <- summarise_at(dataset, .vars = cn, .funs = funs(max(., na.rm = TRUE)))\n
-
-        list(min = mn, max = mx)\n
-      }\n
-
-      sig_stars <- function(pval) {\n
-        sapply(pval, function(x) x < c(.001, .01, .05, .1)) %>%\n
-          colSums() %>%\n
-          add(1) %>%\n
-          c("", ".", "*", "**", "***")[.]\n
-      }\n
-
-      vars <- ""\n
-      var_check(e_vars, colnames(dataset)[-1], int) %>%\n
-      {vars <<- .$vars; evar <<- .$ev; int <<- .$intv}\n
-
-      mmx <- minmax(dataset)\n
-
-      form_upper <- paste(r_var, "~", paste(vars, collapse = " + ")) %>% as.formula()\n
-      form_lower <- paste(r_var, "~ 1") %>% as.formula()\n
-
-      model <- lm(form_upper, data = dataset)\n
-
-      attr(model$model, "min") <- mmx[["min"]]\n
-      attr(model$model, "max") <- mmx[["max"]]\n
-
-      coeff <- tidy(model) %>% as.data.frame()\n
-      colnames(coeff) <- c("  ", "coefficient", "std.error", "t.value", "p.value")\n
-
-      coeff$sig_star  <- sig_stars(coeff$p.value) %>% format(justify = "left")\n
-      colnames(coeff) <- c("label", "coefficient", "std.error", "t.value", "p.value", "sig_star")\n
-
-      hasLevs <- sapply(dplyr::select(dataset, -1), function(x) is.factor(x) || is.logical(x) || is.character(x))\n
-      if (sum(hasLevs) > 0) {\n
-        for (i in names(hasLevs[hasLevs])) {\n
-          coeff$label %<>% gsub(paste0("^", i), paste0(i, "|"), .) %>%\n
-            gsub(paste0(":", i), paste0(":", i, "|"), .)\n
+          list(min = mn, max = mx)\n
         }\n
-        rm(i)\n
-      }\n
 
-      print("Linear regression (OLS)")\n
-      print(paste("Dataset: ", dataset_name))
+        sig_stars <- function(pval) {\n
+          sapply(pval, function(x) x < c(.001, .01, .05, .1)) %>%\n
+            colSums() %>%\n
+            add(1) %>%\n
+            c("", ".", "*", "**", "***")[.]\n
+        }\n
 
-    `;
+        vars <- ""\n
+        var_check(e_vars, colnames(dataset)[-1], int) %>%\n
+        {vars <<- .$vars; evar <<- .$ev; int <<- .$intv}\n
 
-    cmd = cmd.format(
-      this.df(), 
-      this.state.r_var, 
-      this.state.e_vars.join(':'), 
-      this.dataset_name()
-    );
+        mmx <- minmax(dataset)\n
 
-    analev_eval(cmd, (req_id, resp) => {
+        form_upper <- paste(r_var, "~", paste(vars, collapse = " + ")) %>% as.formula()\n
+        form_lower <- paste(r_var, "~ 1") %>% as.formula()\n
+
+        model <- lm(form_upper, data = dataset)\n
+
+        attr(model$model, "min") <- mmx[["min"]]\n
+        attr(model$model, "max") <- mmx[["max"]]\n
+
+        coeff <- tidy(model) %>% as.data.frame()\n
+        colnames(coeff) <- c("  ", "coefficient", "std.error", "t.value", "p.value")\n
+
+        coeff$sig_star  <- sig_stars(coeff$p.value) %>% format(justify = "left")\n
+        colnames(coeff) <- c("label", "coefficient", "std.error", "t.value", "p.value", "sig_star")\n
+
+        hasLevs <- sapply(dplyr::select(dataset, -1), function(x) is.factor(x) || is.logical(x) || is.character(x))\n
+        if (sum(hasLevs) > 0) {\n
+          for (i in names(hasLevs[hasLevs])) {\n
+            coeff$label %<>% gsub(paste0("^", i), paste0(i, "|"), .) %>%\n
+              gsub(paste0(":", i), paste0(":", i, "|"), .)\n
+          }\n
+          rm(i)\n
+        }\n
+      `.format(this.df(), this.state.r_var, this.state.e_vars.join(':'), this.dataset_name()), 
+
+      `print("Linear regression (OLS)")`, 
+      `print(paste("Dataset: ", dataset_name))`
+    ];
+
+    cmds.forEach((cmd) => analev_eval(cmd, (req_id, resp) => {
       resp = JSON.parse(resp);
       if (resp.success) {
-        this.textarea.value(resp.data.text);
+        if(resp.data.text && resp.data.text != "NULL") this.textarea.append(resp.data.text);
         // this.setState({ result: resp.data.text })
       } else {
         console.log(resp.data)
       }
-    })
+    }))
   }
 }

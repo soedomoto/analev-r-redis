@@ -41,8 +41,17 @@ class ReactCodeMirror extends React.Component {
     });
   }
 
+  clear() {
+    this.editor.getDoc().setValue('');
+  }
+
   value(text) {
     this.editor.getDoc().setValue(text);
+  }
+
+  append(text) {
+    var val = (this.editor.getDoc().getValue() ? this.editor.getDoc().getValue() + '\n' : '') + text;
+    this.editor.getDoc().setValue(val);
   }
 
   render() {

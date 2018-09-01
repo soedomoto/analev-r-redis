@@ -26,14 +26,15 @@ if (file.exists(session.rdata)) {
 app.dir <- Sys.getenv('APP_DIR', '/app')
 module.dir <- Sys.getenv('MODULE_DIR', '/module')
 
-# Load libraries and sources
-lapply(.packages(all.available = TRUE), function(xx) tryCatch({ 
-    if(! (xx %in% (.packages()))) library(xx, character.only = TRUE) 
-}, error = function(e) {}) )
-# library(redux)
-# library(jsonlite)
-# library(foreign)
-# library(readxl)
+# Load libraries and sources -> make memory huge
+# lapply(.packages(all.available = TRUE), function(xx) tryCatch({ 
+#     if(! (xx %in% (.packages()))) library(xx, character.only = TRUE) 
+# }, error = function(e) {}) )
+
+library(redux)
+library(jsonlite)
+library(foreign)
+library(readxl)
 
 source(normalizePath(file.path(app.dir, 'util.R')))
 source(normalizePath(file.path(app.dir, 'converter.R')))

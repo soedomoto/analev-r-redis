@@ -14,6 +14,9 @@ data.path <- function(data.name) {
 }
 
 get_data <- function(dataset, vars = "", filt = "", rows = NULL, na.rm = TRUE) {
+  library(rlang)
+  library(dplyr)
+
   filt <- gsub("\\n", "", filt) %>%
     gsub("\"", "\'", .)
 

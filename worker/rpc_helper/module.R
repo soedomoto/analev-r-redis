@@ -1,5 +1,7 @@
 mysql.db <- NULL;
 database.mysql <- function() {
+    library(RMySQL)
+    
     if (is.null(mysql.db)) {
         mysql.db <<- dbConnect(MySQL(), user=Sys_getenv("MYSQL_USER", 'root'), password=Sys_getenv("MYSQL_PASSWORD", 'toor'), dbname=Sys_getenv("MYSQL_DATABASE", 'analev'), host=Sys_getenv("MYSQL_HOST", '127.0.0.1'));
     }
@@ -8,8 +10,6 @@ database.mysql <- function() {
 }
 
 module.all <- function() {
-    library(RMySQL)
-
     db <- database.mysql()
     rs <- dbSendQuery(db, 'SELECT id, name, label FROM module_model')
     rows <- dbFetch(rs)
@@ -18,7 +18,6 @@ module.all <- function() {
 }
 
 module.read <- function(mod.id) {
-    library(RMySQL)
     library(readr)
 
     db <- database.mysql()
