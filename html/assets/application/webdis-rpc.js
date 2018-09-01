@@ -60,7 +60,7 @@ function _send_cmd_request(req_id, cmd, callback) {
             if (val <= 0) {
                 console.log(req_id, 'Command failed to execute')
             } else {
-                callback(req_id);
+                callback(req_id, s_url);
             }
         });
     });
@@ -83,7 +83,7 @@ function _send_rpc_request(req_id, func_name, params, callback) {
             if (val <= 0) {
                 console.log(req_id, 'Command failed to execute')
             } else {
-                callback(req_id);
+                callback(req_id, s_url);
             }
         });
     });
@@ -104,8 +104,13 @@ function _wait_for_response(req_id) {
                 _wait_for_response(req_id);
             } else {
                 if(req_id in window.req_callbacks) {
-                    window.req_callbacks[req_id](req_id, resp[1]);
+                    var req_url = null;
+                    if (req_id in window.req_urls) req_url = window.req_urls[req_id];
+
+                    window.req_callbacks[req_id](req_id, resp[1], req_url, s_url);
+
                     delete window.req_callbacks[req_id];
+                    if (req_id in window.req_urls) delete window.req_urls[req_id];
                 }
             }
         });
@@ -116,9 +121,11 @@ function analev_eval(cmd, callback) {
     req_id = uuid();
 
     if (! ('req_callbacks' in window)) window.req_callbacks = {};
+    if (! ('req_urls' in window)) window.req_urls = {};
     if (callback) window.req_callbacks[req_id] = callback;
 
-    _send_cmd_request(req_id, cmd, function(_req_id) {
+    _send_cmd_request(req_id, cmd, function(_req_id, _req_url) {        
+        if (_req_url) window.req_urls[_req_id] = _req_url;
         _wait_for_response(_req_id);
     });
 }
@@ -127,9 +134,11 @@ function analev_call(func_name, json_params=[], callback) {
     req_id = uuid();
 
     if (! ('req_callbacks' in window)) window.req_callbacks = {};
+    if (! ('req_urls' in window)) window.req_urls = {};
     if (callback) window.req_callbacks[req_id] = callback;
 
-    _send_rpc_request(req_id, func_name, json_params, function(_req_id) {
+    _send_rpc_request(req_id, func_name, json_params, function(_req_id, _req_url) {
+        if (_req_url) window.req_urls[_req_id] = _req_url;
         _wait_for_response(_req_id);
     });
 }

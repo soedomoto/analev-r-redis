@@ -7,21 +7,24 @@ database.mysql <- function() {
     return(mysql.db);
 }
 
-data.get_catalogues <- function() {
+module.all <- function() {
+    library(RMySQL)
+
     db <- database.mysql()
-    rs <- dbSendQuery(db, 'SELECT id, label FROM data_model')
+    rs <- dbSendQuery(db, 'SELECT id, name, label FROM module_model')
     rows <- dbFetch(rs)
 
     return(rows)
 }
 
-data.read <- function(cat.id, var.name) {
+module.read <- function(mod.id) {
+    library(RMySQL)
+    library(readr)
+
     db <- database.mysql()
-    rs <- dbSendQuery(db, paste0('SELECT location, r_handler FROM data_model WHERE id = "', cat.id, '"'))
+    rs <- dbSendQuery(db, paste0('SELECT location FROM module_model WHERE id = "', mod.id, '"'))
     row <- dbFetch(rs)
 
-    df <- eval(parse(text=paste(var.name, '<<-', str_replace(row$r_handler, "\\?", paste0('"', row$location, '"')))))
-    csv <- process.dataframe.to.csv(head(df))
-
-    return(csv)
+    mod.loc <- file.path(module.dir, row$location)
+    return(read_file(mod.loc))
 }

@@ -1,361 +1,226 @@
-class DataSelectorApp extends React.Component {
+class DatasetWidgetApp extends React.Component {
   constructor(props) {
     super(props);
 
-    this.selector_modal__show = this.selector_modal__show.bind(this);
-
     this.state = {
-      dataset_initialized: false, 
-      datasets: {}, 
-      selector_modal__is_shown: false, 
-    };
+      modal_selector_app: null, 
+      selected_dataset_app: null, 
+    }
+
+    if (this.props.self) this.props.self(this);
   }
 
-  initializing() {
-    var _this = this;
+  app() {
+    return this.props.app;
+  }
 
-    analev_call('data.get_catalogues', [], function(req_id, resp) {
+  render() {
+    return React.createElement('div', {}, 
+      // React.createElement(DatasetWidgetApp_SelectedDatasets, { app: this }), 
+      
+      React.createElement(SelectedDatasetWidgetApp, {
+        app: this.app(), 
+        self: (app) => this.state.selected_dataset_app = app
+      }), 
+
+      React.createElement('div', { className: 'text-center' }, 
+        React.createElement(ReactBootstrap.Button, { 
+          bsStyle: 'primary', 
+          onClick: () => this.state.modal_selector_app.setState({ show: true })
+        }, 'Select Data')
+      ), 
+      
+      React.createElement(DatasetSelectorApp, {
+        app: this.app(), 
+        self: (app) => this.state.modal_selector_app = app
+      }), 
+    );
+  }
+}
+
+class SelectedDatasetWidgetApp extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      show: false,
+    }
+
+    if (this.props.self) this.props.self(this);
+  }
+
+  app() {
+    return this.props.app;
+  }
+
+  datasets() {
+    return this.app().state.datasets;
+  }
+
+  selected_datasets() {
+    var selected_datasets = [];
+
+    Object.keys(this.datasets()).forEach(id => {
+      if (this.datasets()[id].selected) {
+        selected_datasets.push(id);
+      }
+    });
+
+    return selected_datasets;
+  }
+
+  remove_dataset(id) {
+    var _self = this, 
+      cmd = 'remove(df{0})'.format(this.datasets()[id].idx);
+    
+    analev_eval(cmd, function(req_id, resp) {
       resp = JSON.parse(resp);
       if (resp.success) {
-        _this.setState({
-          datasets: resp.data.reduce((obj, d) => {
-            d.selected = false;
-            obj[d.id] = d;
-            return obj;
-          }, {}), 
-          dataset_initialized: true
-        });
+        delete _self.datasets()[id].variables; 
+        delete _self.datasets()[id].preview; 
+        _self.datasets()[id].selected = false; 
+        
+        _self.app().forceUpdate();
+      } else {
+        console.log(resp.data)
       }
     });
   }
 
   render() {
-    if (! this.state.dataset_initialized) this.initializing();
-
-    return React.createElement('div', {}, 
-      React.createElement(DataSelectorApp_SelectedDatasets, { selector_app: this }), 
-      React.createElement('div', { className: 'text-center' }, 
-        React.createElement(ReactBootstrap.Button, { 
-          bsStyle: 'primary', 
-          onClick: () => this.selector_modal__show()
-        }, 'Select Data')
+    return React.createElement('div', { className: 'panel panel-default' }, 
+      React.createElement('table', { className: 'table table-bordered' }, 
+        React.createElement('tbody', {}, 
+          this.selected_datasets().map(id => 
+            React.createElement('tr', { key: id }, 
+              React.createElement('td', {}, 'df' + this.datasets()[id].idx), 
+              React.createElement('td', {}, this.datasets()[id].label), 
+              React.createElement('td', {}, 
+                React.createElement(ReactBootstrap.Button, {
+                  onClick: () => {
+                    this.state.preview_app.setState({
+                      show: true, 
+                      id: id
+                    })
+                  }
+                }, 'Preview'), 
+                React.createElement(ReactBootstrap.Button, {
+                  onClick: () => {
+                    this.state.visualization_app.setState({
+                      show: true, 
+                      id: id
+                    })
+                  }
+                }, 'Visualize'), 
+                React.createElement(ReactBootstrap.Button, {
+                  onClick: () => {
+                    this.remove_dataset(id)
+                  }
+                }, 'Remove'), 
+              )
+            )
+          )
+        )
       ), 
-      this.selector_modal__render()
+
+      React.createElement(PreviewApp, { 
+        app: this.props.app, 
+        self: (app) => this.state.preview_app = app
+      }), 
+      
+      React.createElement(VisualizationApp, { 
+        app: this.props.app, 
+        self: (app) => this.state.visualization_app = app
+      }), 
     );
   }
+}
 
-  // Modal
+class DatasetSelectorApp extends React.Component {
+  constructor(props) {
+    super(props);
 
-  selector_modal__render() {
+    this.state = {
+      show: false,
+    }
+
+    if (this.props.self) this.props.self(this);
+  }
+
+  app() {
+    return this.props.app;
+  }
+
+  datasets() {
+    return this.app().state.datasets;
+  }
+
+  generate_index(id) {
+    if (! ('idx' in this.datasets()[id])) {
+      var idxs = [], 
+        n_ds = 0;
+
+      Object.values(this.datasets()).forEach(d => {
+        if ('idx' in d) idxs.push(d.idx);
+        n_ds += 1;
+      });
+
+      for(var i=0; i<n_ds; i++) {
+        if (! (i in idxs)) {
+          this.datasets()[id].idx = i;
+          break;
+        }
+      }
+    }
+  }
+
+  select_dataset(id) {
+    var _self = this;
+
+    this.generate_index(id);
+    analev_call('data.read', [_self.datasets()[id].id, 'df' + _self.datasets()[id].idx], function(req_id, resp) {
+      resp = JSON.parse(resp);
+      if (resp.success) {
+        var data = Papa.parse(resp.data);
+        _self.datasets()[id].variables = data.data[0];
+        _self.datasets()[id].preview = data.data;
+        _self.datasets()[id].selected = true;
+        
+        _self.setState({ show: false });
+        _self.app().forceUpdate();
+      }
+    })
+  }
+
+  render() {
     return React.createElement(ReactBootstrap.Modal, {
-      show: this.state.selector_modal__is_shown, 
-      onHide: () => this.selector_modal__hide(), 
-      onEntering: () => this.selector_modal__on_entering()
+      show: this.state.show, 
+      onHide: () => this.setState({ show: false }), 
+      onEntering: () => {}
     }, 
       React.createElement(ReactBootstrap.Modal.Header, { closeButton: true }, 
         React.createElement(ReactBootstrap.Modal.Title, {}, 'Select Dataset')
       ), 
       React.createElement(ReactBootstrap.Modal.Body, {}, 
         React.createElement(ReactBootstrap.ListGroup, {}, 
-          Object.keys(this.state.datasets).map((id, idx) => 
-            React.createElement(DataSelectorApp_Dataset, { 
-              selector_app: this, 
-              id: id, 
-              key: id, 
-              on_selected: (_id, _data) => {
-                this.state.datasets[_id].idx = idx;
-                this.state.datasets[_id].variables = _data.data[0];
-                this.state.datasets[_id].preview = _data.data;
-                this.state.datasets[_id].selected = true;
-                
-                this.forceUpdate();
-                this.selector_modal__hide();
-              }
-            })
+          (this.app() ? 
+            Object.keys(this.app().state.datasets).map((id) => 
+              React.createElement(ReactBootstrap.ListGroupItem, {
+                key: id, 
+                href: '#', 
+                onClick: () => {
+                  this.select_dataset(id);
+                }
+              }, this.app().state.datasets[id].label)
+            ) : null
           )
         )
       ), 
       React.createElement(ReactBootstrap.Modal.Footer, {}, 
         React.createElement(ReactBootstrap.Button, {
-          onClick: () => this.selector_modal__hide()
+          onClick: () => this.setState({ show: false })
         }, 'Close')
       )
     );
-  }
-
-  selector_modal__show() {
-    this.setState({ selector_modal__is_shown: true });
-  }
-
-  selector_modal__hide() {
-    this.setState({ selector_modal__is_shown: false });
-  }
-
-  selector_modal__on_entering() {}
-}
-
-class DataSelectorApp_SelectedDatasets extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      preview_shown: false, 
-      preview_dataset_id: null, 
-
-      visualization_shown: false, 
-      visualization_dataset_id: null, 
-    }
-  }
-
-  preview_dataset() {
-    return this.props.selector_app.state.datasets[this.state.preview_dataset_id];
-  }
-
-  render_preview_modal() {
-    return React.createElement(ReactBootstrap.Modal, {
-      show: this.state.preview_shown, 
-      onHide: () => this.setState({ preview_shown: false }), 
-      onEntering: () => {}
-    }, 
-      React.createElement(ReactBootstrap.Modal.Header, { closeButton: true }, 
-        React.createElement(ReactBootstrap.Modal.Title, {}, 
-          'Preview Dataset ' + (this.state.preview_dataset_id ? this.preview_dataset().label : '')
-        )
-      ), 
-      React.createElement(ReactBootstrap.Modal.Body, {}, 
-        React.createElement(ReactBootstrap.Table, { responsive: true }, 
-          React.createElement('thead', {}, 
-            (this.state.preview_dataset_id ? React.createElement('tr', {}, 
-              this.preview_dataset().preview[0].map(c => React.createElement('th', {}, c))
-            ) : null)
-          ), 
-          React.createElement('tbody', {}, 
-            (this.state.preview_dataset_id ? this.preview_dataset().preview.slice(1).map(r => React.createElement('tr', {}, 
-                r.map(c => React.createElement('td', {}, c))
-              )) : null)
-          )
-        )
-      ), 
-      React.createElement(ReactBootstrap.Modal.Footer, {}, 
-        React.createElement(ReactBootstrap.Button, {
-          onClick: () => this.setState({ preview_shown: false })
-        }, 'Close')
-      )
-    );
-  }
-
-  visualization_dataset() {
-    return this.props.selector_app.state.datasets[this.state.visualization_dataset_id];
-  }
-
-  render_visualization_modal() {
-    return React.createElement(ReactBootstrap.Modal, {
-      show: this.state.visualization_shown, 
-      onHide: () => this.setState({ visualization_shown: false }), 
-      onEntering: () => {}
-    }, 
-      React.createElement(ReactBootstrap.Modal.Header, { closeButton: true }, 
-        React.createElement(ReactBootstrap.Modal.Title, {}, 
-          'Visualize Dataset ' + (this.state.visualization_dataset_id ? this.visualization_dataset().label : '')
-        )
-      ), 
-      React.createElement(ReactBootstrap.Modal.Body, {}, 
-        React.createElement(DataSelectorApp_PreviewDataset, { id: this.state.visualization_dataset_id, selector_app: this.props.selector_app })
-      ), 
-      React.createElement(ReactBootstrap.Modal.Footer, {}, 
-        React.createElement(ReactBootstrap.Button, {
-          onClick: () => this.setState({ visualization_shown: false })
-        }, 'Close')
-      )
-    );
-  }
-
-  render() {
-    var selected_datasets = [];
-
-    Object.keys(this.props.selector_app.state.datasets).forEach(id => {
-      if (this.props.selector_app.state.datasets[id].selected) {
-        selected_datasets.push(id);
-      }
-    })
-
-    return React.createElement('div', { className: 'panel panel-default' }, 
-      React.createElement('table', { className: 'table table-bordered' }, 
-        React.createElement('tbody', {}, 
-          selected_datasets.map(id => 
-            React.createElement(DataSelectorApp_SelectedDataset, {
-              key: id, 
-              id: id, 
-              selector_app: this.props.selector_app, 
-              show_preview: (selected_id) => {
-                this.setState({
-                  preview_shown: true, 
-                  preview_dataset_id: selected_id
-                });
-              }, 
-              show_visualization: (selected_id) => {
-                this.setState({
-                  visualization_shown: true, 
-                  visualization_dataset_id: selected_id
-                });
-              }
-            })
-          )
-        )
-      ), 
-
-      this.render_preview_modal(), 
-      this.render_visualization_modal()
-    );
-  }
-}
-
-class DataSelectorApp_PreviewDataset extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      x_var: null, 
-      y_var: null, 
-      visualization_base64_image: null, 
-    }
-  }
-
-  dataset() {
-    return this.props.selector_app.state.datasets[this.props.id]
-  }
-
-  generate_plot() {
-    var _this = this, 
-      cmd = 
-        '{0}'
-
-        .format(
-          'df' + this.dataset().idx, 
-          this.state.x_var
-        )
-
-        // 'tmp <- {0} %>%\n' + 
-        //   'group_by_at(.vars = {1}) %>%\n' + 
-        //   'select_at(.vars = {2}) %>%\n' + 
-        //   'na.omit() %>%\n' + 
-        //   'summarise_all(fun)\n'
-        //   .format(
-        //     'df' + this.dataset().idx, 
-        //     this.state.x_var, 
-        //     this.state.y_var
-        //   );
-
-    console.log(cmd)
-
-    analev_eval(cmd, function(req_id, resp) {
-      resp = JSON.parse(resp);
-      if (resp.success) {
-        console.log(resp.data)
-
-        if (resp.data.type == 'image') {
-          _this.setState({ visualization_base64_image: resp.data.text })
-        }
-      } else {
-        console.log(resp.data)
-      }
-    })
-  }
-
-  render() {
-    return React.createElement('div', { className: 'row' }, 
-      React.createElement('div', { className: 'col-lg-4 col-md-4 col-sm-12 col-xs-12' }, 
-        React.createElement(ReactBootstrap.FormGroup, {}, 
-          React.createElement(ReactBootstrap.ControlLabel, {}, 'Plot Type'), 
-          React.createElement('select', { className: 'form-control' }, 
-            React.createElement('option', { value: '' }, 'None'), 
-            React.createElement('option', { value: 'bar' }, 'Bar'), 
-            React.createElement('option', { value: 'line' }, 'Line')
-          ), 
-          React.createElement(ReactBootstrap.HelpBlock, {}, 'Select plot type')
-        ), 
-        React.createElement(ReactBootstrap.FormGroup, {}, 
-          React.createElement(ReactBootstrap.ControlLabel, {}, 'X Variable'), 
-          React.createElement('select', { className: 'form-control', onChange: (ev) => this.state.x_var = ev.target.value }, 
-            React.createElement('option', { value: '' }, 'None'), 
-            this.dataset().variables.map((v, idx) => React.createElement('option', { key: idx, value: v }, v))
-          ), 
-          React.createElement(ReactBootstrap.HelpBlock, {}, 'Select X variable')
-        ), 
-        React.createElement(ReactBootstrap.FormGroup, {}, 
-          React.createElement(ReactBootstrap.ControlLabel, {}, 'Y Variable'), 
-          React.createElement('select', { className: 'form-control', onChange: (ev) => this.state.y_var = ev.target.value }, 
-            React.createElement('option', { value: '' }, 'None'), 
-            this.dataset().variables.map((v, idx) => React.createElement('option', { key: idx, value: v }, v))
-          ), 
-          React.createElement(ReactBootstrap.HelpBlock, {}, 'Select Y variable')
-        ), 
-        React.createElement(ReactBootstrap.FormGroup, {}, 
-          React.createElement(ReactBootstrap.Button, { className: 'form-control', onClick: () => this.generate_plot() }, 'Generate Plot')
-        )
-      ), 
-      React.createElement('div', { className: 'col-lg-8 col-md-8 col-sm-12 col-xs-12' }, 
-        (this.state.visualization_base64_image ? React.createElement('img', { 
-          style: { width: '100%' }, 
-          src: 'data:image/png;base64,' + this.state.visualization_base64_image 
-        }) : null)
-      )
-    );
-  }
-}
-
-class DataSelectorApp_SelectedDataset extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {}
-  }
-
-  dataset() {
-    return this.props.selector_app.state.datasets[this.props.id];
-  }
-
-  render() {
-    return React.createElement('tr', {}, 
-      React.createElement('td', {}, 'df' + this.dataset().idx), 
-      React.createElement('td', {}, this.dataset().label), 
-      React.createElement('td', {}, 
-        React.createElement(ReactBootstrap.Button, {}, 'Remove'), 
-        React.createElement(ReactBootstrap.Button, { onClick: () => {
-          if(this.props.show_preview) this.props.show_preview(this.props.id);
-        } }, 'Preview'), 
-        React.createElement(ReactBootstrap.Button, { onClick: () => {
-          if(this.props.show_visualization) this.props.show_visualization(this.props.id);
-        } }, 'Visualize')
-      )
-    );
-  }
-}
-
-class DataSelectorApp_Dataset extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {};
-  }
-
-  dataset() {
-    return this.props.selector_app.state.datasets[this.props.id];
-  }
-
-  render() {
-    return React.createElement(ReactBootstrap.ListGroupItem, {
-      href: '#', 
-      onClick: () => this.dataset__on_selected()
-    }, this.dataset().label)
-  }
-
-  dataset__on_selected() {
-    var _self = this;
-
-    analev_call('data.read', [_self.dataset().id, 'df' + _self.state.variable_idx], function(req_id, resp) {
-      resp = JSON.parse(resp);
-      if (resp.success) {
-        if (_self.props.on_selected) _self.props.on_selected(_self.props.id, Papa.parse(resp.data))
-      }
-    })
   }
 }

@@ -41,12 +41,17 @@ process.response <- function(resp, err_code) {
         dresp <- 'OK'
     }
 
+    else if (is.character(resp)) {
+        dtype <- 'plain'
+        dresp <- resp
+
+        # resp <- capture.output(resp)
+        # dresp <- paste(resp, collapse = '\n')
+    } 
+
     else {
         dtype <- 'plain'
-        # dresp <- toString(resp)
-
-        out <- capture.output(resp)
-        dresp <- paste(out, collapse = '\n')
+        dresp <- paste(capture.output(resp), collapse = '\n')
     }
 
     # eval(parse(text='if(file.exists("tmp.png")) { b64i <- base64enc::base64encode(readBin("tmp.png", "raw", file.info("tmp.png")[1, "size"]), "txt"); unlink("tmp.png"); }'));

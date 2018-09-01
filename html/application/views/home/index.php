@@ -1,6 +1,12 @@
 <?php $this->load->view('templates/header'); ?>
 <?php $this->load->view('home/menu'); ?>
 
+<style type="text/css">
+    .modal-lg {
+        width: 95%;
+    }
+</style>
+
 <div class="content-wrap">
     <div class="main">
         <div class="container-fluid">
@@ -29,39 +35,18 @@
                 </div>
             </div>
 
-            <div id="main_content">
-                <div class="row">
-                    <!-- Left panel -->
-                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                        <div class="card alert">
-                            <div class="card-header">
-                                <h4>Dataset</h4>
-                            </div>
-                            <div class="card-body">
-                                <div id="dataset_selector"></div>
-                            </div>
-                        </div>
-                    </div>
-            
-                    <!-- Main panel -->
-                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                        <div class="card alert">
-                            <div class="card-header">
-                                <h4>Masukkan Parameter</h4>
-                            </div>
-                            <div class="card-body">
-                                Body Hasil
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <div id="main_content"></div>
         </div>
     </div>
 </div>
 
-<script src="<?php echo assets_url() ?>/application/data_selector_app.js"></script>
 <script src="<?php echo assets_url() ?>/application/main_app.js"></script>
+<script src="<?php echo assets_url() ?>/application/data_selector_app.js"></script>
+<script src="<?php echo assets_url() ?>/application/data_preview_app.js"></script>
+<script src="<?php echo assets_url() ?>/application/data_visualization_app.js"></script>
+<script src="<?php echo assets_url() ?>/application/module_selector_app.js"></script>
+<script src="<?php echo assets_url() ?>/application/module_open_app.js"></script>
+<script src="<?php echo assets_url() ?>/application/module_base_app.js"></script>
 
 <script type="text/javascript">
     $(function() {

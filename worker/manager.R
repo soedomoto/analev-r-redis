@@ -4,6 +4,7 @@ library(jsonlite)
 library(processx)
 
 app.dir <- Sys.getenv('APP_DIR', '/app')
+source(normalizePath(file.path(app.dir, 'util.R')))
 
 is_windows <- function () (tolower(.Platform$OS.type) == "windows")
 
@@ -17,7 +18,7 @@ Rscript_binary <- function () {
   return(file.path(R.home("bin"), R_exe))
 }
 
-processx:::supervisor_ensure_running()
+# processx:::supervisor_ensure_running()
 conn <- redux::hiredis()
 
 spawn.process <- function(req.sess) {
@@ -35,22 +36,38 @@ while(1) {
         inp.arr <- fromJSON(inp.req)
         req.sess <- inp.arr$sess
 
-        cat("Request from", req.sess, "\n")
+        # cat("Request from", req.sess, "\n")
+        conn$LPUSH("log", paste(script.name(), "-", "Request from", req.sess))
         conn$LPUSH(paste0("req-", req.sess), inp.req)
 
         is.proc.alive <- FALSE
-        is.alive.timeout <- 1
-        while(! is.proc.alive) {
-            is.alive.arr <- conn$BRPOP(paste0("alive-", req.sess), is.alive.timeout)
-            is.alive <- is.alive.arr[[2]]
-            if (! is.null(is.alive)) {
-                cat("Worker", req.sess, " is alive\n")
-                is.proc.alive <<- TRUE
-            } else {
-                cat("Worker", req.sess, " is dead. Restarting...\n")
-                spawn.process(req.sess)
-                is.alive.timeout <<- 3
+        while (!is.proc.alive) {
+            pid.arr <- conn$GET(paste0("session-pid-", req.sess))
+            
+            if (! is.null(pid.arr)) {
+                if (processx:::process__exists( as.integer(pid.arr) )) {
+                    is.proc.alive <- TRUE
+                    next
+                }
             }
+
+            spawn.process(req.sess)
+            Sys.sleep(1)
         }
+
+        # is.proc.alive <- FALSE
+        # is.alive.timeout <- 1
+        # while(! is.proc.alive) {
+        #     is.alive.arr <- conn$BRPOP(paste0("alive-", req.sess), is.alive.timeout)
+        #     is.alive <- is.alive.arr[[2]]
+        #     if (! is.null(is.alive)) {
+        #         cat("Worker", req.sess, " is alive\n")
+        #         is.proc.alive <<- TRUE
+        #     } else {
+        #         cat("Worker", req.sess, " is dead. Restarting...\n")
+        #         spawn.process(req.sess)
+        #         is.alive.timeout <<- 3
+        #     }
+        # }
     }
 }

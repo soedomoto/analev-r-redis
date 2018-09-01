@@ -15,7 +15,9 @@ RUN Rscript -e "install.packages(c('XML', 'xtable', 'foreign', 'base64enc', 'tid
 RUN apt-get update \
     && apt-get install -y libmariadbclient-dev \
     && rm -rf /var/lib/apt/lists/*
-    
+
 RUN Rscript -e "install.packages(c('RMySQL'))"
 RUN Rscript -e "install.packages(c('readr'))"
 RUN Rscript -e "install.packages(c('dplyr'))"
+RUN Rscript -e "install.packages(c('broom'))"
+RUN Rscript -e "install.packages(c('Rserve'))"
