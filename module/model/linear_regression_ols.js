@@ -123,7 +123,7 @@ window.ARFormControl = class extends React.Component {
         if (this.props.onChange) this.props.onChange(el);
       }, 
       onClick: (el) => {
-        if (this.props.onChange) this.props.onClick(el);
+        if (this.props.onClick) this.props.onClick(el);
       }, 
     }, this.props.class_props));
 
@@ -230,8 +230,10 @@ window.LinearRegressionOLS = class extends BaseModule {
           onAfterLoad: (el) => {
             if (! _.isEmpty(el.value())) {
               this.btn_process.show();
+              this.state.e_vars = el.value();
             } else {
               this.btn_process.hide();
+              this.state.e_vars = [];
             }
           }, 
           onChange: (el) => {
@@ -249,6 +251,9 @@ window.LinearRegressionOLS = class extends BaseModule {
           onInit: (el) => {
             this.btn_process = el;
           }, 
+          onClick: () => {
+            this.process_summarize();
+          }, 
           show: false,
           class: ARButton, 
           class_props: {
@@ -260,66 +265,6 @@ window.LinearRegressionOLS = class extends BaseModule {
         React.createElement(ReactCodeMirror, { ref: (el) => this.textarea = el })
       )
     )
-  }
-
-  // render_dataset_selection() {
-  // 	return [React.createElement(ReactBootstrap.FormGroup, {key: 'dataset_selector'}, 
-  //       React.createElement(ReactBootstrap.ControlLabel, {}, 'Dataset'), 
-  //       React.createElement(ARSelect, {
-  //         options: this.datasets().map((d) => {return {value: d.id, label: d.label}}), 
-  //         onChange: (ev, value) => this.setState({ dataset_id: value }),
-  //       }), 
-  //     //   React.createElement('select', {
-	 //     //      className: 'form-control', 
-	 //     //      onChange: (ev) => this.setState({ dataset_id: ev.target.value })
-	 //     //    }, 
-  //     //   	React.createElement('option', { value: '' }, 'None'), 
-  //   		// 	this.datasets().map((d, idx) => 
-  //   		// 		React.createElement('option', { key: idx, value: d.id }, d.label)
-  // 				// )
-  //     //   ), 
-  //       React.createElement(ReactBootstrap.HelpBlock, {}, 'Select dataset')
-  //     )].concat(this.render_options());
-  // }
-
-  render_options() {
-  	if (!this.dataset() || !this.dataset().variables) return [];
-
-    return [
-      React.createElement(ReactBootstrap.FormGroup, { key: 'response_variable_selector' }, 
-        React.createElement(ReactBootstrap.ControlLabel, {}, 'Response Variable'), 
-        React.createElement('select', {
-          className: 'form-control', 
-          onChange: (ev) => {
-            this.setState({ r_var: ev.target.value });
-          }
-        }, 
-        	React.createElement('option', { value: '' }, 'None'), 
-          this.get_r_var().map((v, idx) => React.createElement('option', { key: idx, value: v }, v))
-        ), 
-        React.createElement(ReactBootstrap.HelpBlock, {}, 'Select response variable')
-      ), 
-
-      this.state.r_var_changing ? null : (
-        React.createElement(ReactBootstrap.FormGroup, { key: 'explanatory_variable_selector' }, 
-          React.createElement(ReactBootstrap.ControlLabel, {}, 'Explanatory Variables'), 
-          React.createElement(ARSelect, {
-            options: this.get_e_vars(), 
-            multiple: true, 
-            onChange: (ev, values) => {
-            	this.setState({ e_vars: values })
-            }
-          }), 
-          React.createElement(ReactBootstrap.HelpBlock, {}, 'Select explanatory variable')
-        )
-      ), 
-
-      React.createElement(ReactBootstrap.FormGroup, { key: 'i_process' }, 
-        React.createElement(ReactBootstrap.Button, { className: 'form-control', 
-        	onClick: () => this.process_summarize() 
-        }, 'Process')
-      )
-    ];
   }
 
   process_summarize() {
@@ -337,6 +282,7 @@ window.LinearRegressionOLS = class extends BaseModule {
         dataset_name <- "{3}"\n
         data_filter <- ""\n
         check <- ""\n
+        dec <- 3\n
 
         dataset <- get_data(dataset, c(r_var, e_vars))\n
 
@@ -375,6 +321,32 @@ window.LinearRegressionOLS = class extends BaseModule {
             c("", ".", "*", "**", "***")[.]\n
         }\n
 
+        format_nr <- function(\n
+          x, sym = "", dec = 2, perc = FALSE,\n
+          mark = ",", na.rm = TRUE, ...\n
+        ) {\n
+          if (is.data.frame(x)) x <- x[[1]]\n
+          if (na.rm && length(x) > 0) x <- na.omit(x)\n
+          if (perc) {\n
+            paste0(sym, formatC(100 * x, digits = dec, big.mark = mark, format = "f", ...), "%")\n
+          } else {\n
+            paste0(sym, formatC(x, digits = dec, big.mark = mark, format = "f", ...))\n
+          }\n
+        }\n
+
+        format_df <- function(tbl, dec = NULL, perc = FALSE, mark = "", ...) {\n
+          frm <- function(x, ...) {\n
+            if (is_double(x)) {\n
+              format_nr(x, dec = dec, perc = perc, mark = mark, ...)\n
+            } else if (is.integer(x)) {\n
+              format_nr(x, dec = 0, mark = mark, ...)\n
+            } else {\n
+              x\n
+            }\n
+          }\n
+          mutate_all(tbl, .funs = funs(frm))\n
+        }\n
+
         vars <- ""\n
         var_check(e_vars, colnames(dataset)[-1], int) %>%\n
         {vars <<- .$vars; evar <<- .$ev; int <<- .$intv}\n
@@ -410,6 +382,20 @@ window.LinearRegressionOLS = class extends BaseModule {
 
         e_vars <- strsplit(e_vars, ":")\n
         expl_var <- if (length(e_vars) == 1) e_vars else "x"\n
+        coeff$label %<>% format(justify = "left")\n
+
+        if (all(coeff$p.value == "NaN")) {\n
+          coeff[, 2] %<>% {sprintf(paste0("%.", dec, "f"), .)}\n
+          coeff.print <- paste0(\n
+            print(coeff[, 1:2], row.names = FALSE), \n
+            "\nInsufficient variation in explanatory variable(s) to report additional statistics"\n
+          )\n
+        } else {\n
+          p.small <- coeff$p.value < .001\n
+          coeff[, 2:5] %<>% format_df(dec)\n
+          coeff$p.value[p.small] <- "< .001"\n
+          coeff.print <- print(rename(coeff, \`  \` = "label", \` \` = "sig_star"), row.names = FALSE)\n
+        }\n
 
         # Multiple print is still buggy, only last print will be shown -> use print with paste instead\n
         print(paste(
@@ -426,6 +412,7 @@ window.LinearRegressionOLS = class extends BaseModule {
             "**Standardized coefficients shown (2 X SD)**\n", 
             ifelse("center" %in% check, "**Centered coefficients shown (x - mean(x))**\n", "")
           ), 
+          coeff.print, 
           sep=""
         ))\n
       `.format(this.df(), this.state.r_var, this.state.e_vars.join(':'), this.dataset_name()), 
