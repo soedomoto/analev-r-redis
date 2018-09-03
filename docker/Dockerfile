@@ -20,3 +20,5 @@ RUN Rscript -e "install.packages(c('RMySQL'))"
 RUN Rscript -e "install.packages(c('readr'))"
 RUN Rscript -e "install.packages(c('dplyr'))"
 RUN Rscript -e "install.packages(c('broom'))"
+
+# RUN Rscript -e "install.packages(c('devtools', 'redux', 'reticulate', 'processx', 'XML', 'xtable', 'foreign', 'base64enc', 'tidyverse', 'dplyr', 'ggplot2', 'RMySQL', 'readr', 'dplyr', 'broom'))"

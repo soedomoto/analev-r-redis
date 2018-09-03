@@ -1,4 +1,4 @@
-class BaseModule extends React.Component {
+window.BaseModule = class extends React.Component {
 	constructor(props) {
     super(props);
 
@@ -11,12 +11,17 @@ class BaseModule extends React.Component {
     return this.props.app;
   }
 
-  datasets() {
-    return this.app().state.datasets;
-  }
+  // datasets() {
+  //   return this.app().state.datasets;
+  // }
 
-  selected_datasets() {
-    return this.app().selected_dataset_ids().map(id => this.datasets()[id]);
+  datasets() {
+    var selecteds = {};
+    this.app().selected_dataset_ids().forEach((id) => {
+      selecteds[id] = this.app().state.datasets[id];
+    });
+
+    return selecteds;
   }
 
   dataset() {
@@ -24,10 +29,16 @@ class BaseModule extends React.Component {
   }
 }
 
-class ReactCodeMirror extends React.Component {
+
+
+window.ReactCodeMirror = class extends React.Component {
   constructor(props) {
     super(props);
     this.state = {};
+  }
+
+  componentWillMount() {
+    if (this.props.el) this.props.beforeMount(this);
   }
 
   componentDidMount() {
@@ -61,34 +72,3 @@ class ReactCodeMirror extends React.Component {
   }
 }
 
-class BootstrapSelect extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {};
-  }
-
-  componentDidMount() {
-    var _self = this;
-    _self.$el = $(this.el);
-
-    _self.$el
-      .on('loaded.bs.select', function (e) {
-        var cont = $(e.target).parents().filter(function() {
-          if ($(this).hasClass('bootstrap-select')) return true;
-          return false;
-        });
-
-        $(cont).addClass('form-control');
-        $(cont).find('button').addClass('form-control').removeClass('btn-default');
-      })
-      .on('changed.bs.select', e => this.props.onChange(e, $(e.target).val()));
-
-    _self.$el.selectpicker(this.props);
-  }
-
-  render() {
-    return React.createElement('select', { ref: el => this.el = el, multiple: (this.props.multiple || false) }, 
-      this.props.options.map((v, idx) => React.createElement('option', { key: idx, value: v }, v))
-    );
-  }
-}
