@@ -3,7 +3,7 @@
 
 <style type="text/css">
     .modal-lg {
-        width: 95%;
+        width: 95% !important;
     }
 </style>
 

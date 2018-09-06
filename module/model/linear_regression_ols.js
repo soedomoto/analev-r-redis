@@ -153,7 +153,6 @@ window.LinearRegressionOLS = class extends BaseModule {
     this.state = {
       r_var: null, 
       e_vars: null, 
-      // result: null, 
     };
   }
 
@@ -173,8 +172,16 @@ window.LinearRegressionOLS = class extends BaseModule {
     return this.dataset().variables.filter((v) => v != this.state.r_var);
   }
 
+  componentDidMount() {
+    this.$row = $(this.row);
+    console.log(this.$row)
+    this.$row.on('resize', () => {
+        alert('xxx');
+    });
+  }
+
   render() {
-  	return React.createElement('div', { className: 'row' }, 
+  	return React.createElement('div', { className: 'row', ref: (el) => this.row = el }, 
       React.createElement('div', { className: 'col-lg-4 col-md-4 col-sm-12 col-xs-12' }, 
       	// this.render_dataset_selection(), 
         React.createElement(ARFormControl, {
@@ -271,6 +278,7 @@ window.LinearRegressionOLS = class extends BaseModule {
   	var _this = this;
     var cmds = [
       `
+        library(rlist) \n
         library(broom) \n
         library(dplyr) \n
         library(magrittr) \n
@@ -398,7 +406,7 @@ window.LinearRegressionOLS = class extends BaseModule {
         }\n
 
         # Multiple print is still buggy, only last print will be shown -> use print with paste instead\n
-        print(paste(
+        output <- list(
           paste0("Linear regression (OLS)", "\n"), 
           paste0("Dataset: ", dataset_name, "\n"), 
           ifelse(data_filter %>% gsub("\s", "", .) != "", 
@@ -412,9 +420,20 @@ window.LinearRegressionOLS = class extends BaseModule {
             "**Standardized coefficients shown (2 X SD)**\n", 
             ifelse("center" %in% check, "**Centered coefficients shown (x - mean(x))**\n", "")
           ), 
-          coeff.print, 
-          sep=""
-        ))\n
+          "\n", 
+          paste(capture.output(coeff.print), collapse="\n"), 
+          "\n"
+        )\n
+
+        df_int <- if (attr(model$terms, "intercept")) 1L else 0L
+        reg_fit <- glance(model) %>% round(dec)\n
+        if (reg_fit["p.value"] < .001) reg_fit["p.value"] <- "< .001"\n
+        output <- list.append(output, "\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n")\n
+        output <- list.append(output, paste0("R-squared:", paste0(reg_fit$r.squared, ", "), "Adjusted R-squared:", reg_fit$adj.r.squared, "\n"))\n
+        output <- list.append(output, paste0("F-statistic:", reg_fit$statistic, paste0("df(", reg_fit$df - df_int, ",", reg_fit$df.residual, "), p.value"), reg_fit$p.value), "\n")\n
+        output <- list.append(output, paste0("Nr obs:", format_nr(reg_fit$df + reg_fit$df.residual, dec = 0), "\n"))\n
+
+        print(paste(output, collapse=""))\n
       `.format(this.df(), this.state.r_var, this.state.e_vars.join(':'), this.dataset_name()), 
     ];
 
