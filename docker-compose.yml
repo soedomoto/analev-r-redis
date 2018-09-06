@@ -48,7 +48,7 @@ services:
       - "8889:80"
 
   worker:
-    build: docker
+    build: docker_r
     depends_on:
       - redis
       - mysql
@@ -73,7 +73,7 @@ services:
     command: "Rscript /app/manager.R"
 
   logger:
-    build: docker
+    build: docker_r
     depends_on:
       - redis
     links:

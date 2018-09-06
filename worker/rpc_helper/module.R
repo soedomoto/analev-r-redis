@@ -17,6 +17,22 @@ module.all <- function() {
     return(rows)
 }
 
+module.files <- function(id) {
+    db <- database.mysql()
+    rs <- dbSendQuery(db, paste0('SELECT id, module_id, filename, extension FROM module_file_model WHERE module_id = "', id, '"'))
+    rows <- dbFetch(rs)
+
+    return(rows)
+}
+
+module.file.read <- function(mod.id, file.id) {
+    library(readr)
+
+    mod.loc <- file.path(module.dir, mod.id, file.id)
+    return(read_file(mod.loc))
+}
+
+# will be deprecated
 module.read <- function(mod.id) {
     library(readr)
 
