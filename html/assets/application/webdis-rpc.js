@@ -117,9 +117,7 @@ function _wait_for_response(req_id) {
     });
 }
 
-function analev_eval(cmd, callback) {
-    req_id = uuid();
-
+function analev_eval(cmd, callback, req_id = uuid()) {
     if (! ('req_callbacks' in window)) window.req_callbacks = {};
     if (! ('req_urls' in window)) window.req_urls = {};
     if (callback) window.req_callbacks[req_id] = callback;
@@ -130,9 +128,7 @@ function analev_eval(cmd, callback) {
     });
 }
 
-function analev_call(func_name, json_params=[], callback) {
-    req_id = uuid();
-
+function analev_call(func_name, json_params=[], callback, req_id = uuid()) {
     if (! ('req_callbacks' in window)) window.req_callbacks = {};
     if (! ('req_urls' in window)) window.req_urls = {};
     if (callback) window.req_callbacks[req_id] = callback;

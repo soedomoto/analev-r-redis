@@ -1,13 +1,33 @@
 <?php $this->load->view('templates/header'); ?>
 <?php $this->load->view('developer/menu'); ?>
 
+<!-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script> -->
+
 <script type="text/javascript" src="https://cdn.webix.com/edge/webix.js"></script>
 <link rel="stylesheet" type="text/css" href="https://cdn.webix.com/edge/webix.css">
 
 <script type="text/javascript" src="https://cdn.webix.com/components/ace/ace.js"></script>
-<script>
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/ace/1.3.3/ace.js">
+<!-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.3/ace.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.3/ext-modelist.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.3/ext-themelist.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.3/ext-language_tools.js"></script> -->
+
+<script type="text/javascript">
 	webix.codebase = "https://cdn.webix.com/components/ace/";
+
+	// var basePath = "https://cdnjs.cloudflare.com/ajax/libs/ace/1.3.3/";
+	// ace.config.set("basePath", basePath);
+ //  ace.config.set("modePath", basePath);
+ //  ace.config.set("workerPath", basePath);
+ //  ace.config.set("themePath", basePath);
 </script>
+
+<style type="text/css">
+	.ace_editor {
+    font-size: 11px !important;
+	}
+</style>
 
 <div class="content-wrap">
   <div class="main">
@@ -66,14 +86,12 @@
 				    on: {
 				    	onItemClick: function(id, e, node){
 						    var item = this.getItem(id);
+
 						    if (item.$count == 0) {
-									analev_call('module.file.read', [item.$parent, item.id + '.' + item.extension], function(req_id, resp) {
-							      resp = JSON.parse(resp);
-							      if (resp.success) {
-							        $$('editor').setValue(resp.data)
-							        // $$('editor').setMode(item.extension)
-							      }
-							    });
+									if ('content' in item) {
+										this.select(id);
+										$$('editor').setValue(item.content);
+									}
 						    }
 							}
 				    }
@@ -82,10 +100,32 @@
 						view:"resizer"
 					},
 					{
-						view: "ace-editor",
-						id: 'editor', 
-						// theme: "monokai",
-						mode: "javascript"
+						rows: [{
+							view: "toolbar",
+    					id: "editor_toolbar", 
+    					cols: [{
+    						view:"button", 
+    						value:"Save", 
+    						width:100, 
+    						align:"right", 
+    						click: () => {
+    							var file_id = $$('list_modules').getSelectedId();
+    							var curr_code = $$('editor').getValue();
+
+    							analev_call('module.file.save', [file_id, curr_code], function(_req_id, resp) {
+							      var resp = JSON.parse(resp);
+							      if (resp.success) {
+							        $$('list_modules').updateItem(file_id, {content: curr_code});
+							      }
+							    });
+    						}
+    					}]
+						}, {
+							view: "ace-editor",
+							id: 'editor', 
+							theme: "monokai",
+							mode: "javascript",
+						}]
 					}
 			  ]
 			});
@@ -106,6 +146,7 @@
 
 			$$("list_modules_menu").attachTo($$("list_modules"));
 
+			// Load all module(s)
 			analev_call('module.all', [], function(req_id, resp) {
 	      resp = JSON.parse(resp);
 	      if (resp.success) {
@@ -114,13 +155,32 @@
 	        		id: d.id, value: d.label, open: true, 
 	        	}, -1, 'root' );
 
+						// Load file(s) associated with each module
 	        	analev_call('module.files', [d.id], function(req_id, resp) {
 				      resp = JSON.parse(resp);
 				      if (resp.success) {
 				        resp.data.forEach(function (d) {
 				        	$$('list_modules').data.add({
-				        		id: d.id, value: d.filename, extension: d.extension, 
+				        		id: d.id, value: '{0}.{1}'.format(d.filename, d.extension), filename: d.filename, extension: d.extension, 
 				        	}, -1, d.module_id );
+
+				        	// Map filename to file_id
+				        	if (!('filename_fileid_map' in window)) window.filename_fileid_map = {};
+				        	window.filename_fileid_map[d.filename] = d.id;
+
+									// Load content of each file
+									var req_id = uuid();
+									if (!('fileid_reqid_map' in window)) window.fileid_reqid_map = {};
+				        	window.fileid_reqid_map[req_id] = d.id;
+
+				        	analev_call('module.file.read', [d.module_id, d.id + '.' + d.extension], function(_req_id, resp) {
+							      var resp = JSON.parse(resp);
+							      if (resp.success) {
+							        var file_id = window.fileid_reqid_map[_req_id];
+							        $$('list_modules').updateItem(file_id, {content: resp.data});
+							        delete window.fileid_reqid_map[req_id];
+							      }
+							    }, req_id);
 				        });
 				      }
 				    });

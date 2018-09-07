@@ -167,7 +167,7 @@ class ModuleSelectorApp extends React.Component {
 
   select_module(id) {
     // if (! ('src' in this.modules()[id])) {
-      analev_call('module.read', [id], (req_id, resp) => {
+      analev_call('module.file.ui.read', [id], (req_id, resp) => {
         resp = JSON.parse(resp);
         if (resp.success) {
           this.modules()[id].selected = true;   
