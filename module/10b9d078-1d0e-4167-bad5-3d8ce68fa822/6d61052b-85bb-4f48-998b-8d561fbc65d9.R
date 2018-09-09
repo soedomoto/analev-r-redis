@@ -4,76 +4,15 @@ library(dplyr)
 library(magrittr)
 
 int <- ""
-dataset <- {0}
-r_var <- "{1}"
-e_vars <- "{2}"
-dataset_name <- "{3}"
+dataset <- {dataset}
+r_var <- "{r_var}"
+e_vars <- "{e_vars}"
+dataset_name <- "{dataset_name}"
 data_filter <- ""
 check <- ""
 dec <- 3
 
 dataset <- get_data(dataset, c(r_var, e_vars))
-
-var_check <- function(ev, cn, intv = "") {
-  vars <- ev
-  if (length(vars) < length(cn)) vars <- ev <- cn
-
-  if (intv != "" && length(vars) > 1) {
-    if ({
-      intv %>% strsplit(":") %>% unlist()
-    } %in% vars %>% all()) {
-      vars <- c(vars, intv)
-    } else {
-      intv <- ""
-    }
-  }
-
-  list(vars = vars, ev = ev, intv = intv)
-}
-
-minmax <- function(dataset) {
-  isNum <- sapply(dataset, is.numeric)
-  if (sum(isNum) == 0) return(dataset)
-  cn <- names(isNum)[isNum]
-
-  mn <- summarise_at(dataset, .vars = cn, .funs = funs(min(., na.rm = TRUE)))
-  mx <- summarise_at(dataset, .vars = cn, .funs = funs(max(., na.rm = TRUE)))
-
-  list(min = mn, max = mx)
-}
-
-sig_stars <- function(pval) {
-  sapply(pval, function(x) x < c(.001, .01, .05, .1)) %>%
-    colSums() %>%
-    add(1) %>%
-    c("", ".", "*", "**", "***")[.]
-}
-
-format_nr <- function(
-  x, sym = "", dec = 2, perc = FALSE,
-  mark = ",", na.rm = TRUE, ...
-) {
-  if (is.data.frame(x)) x <- x[[1]]
-  if (na.rm && length(x) > 0) x <- na.omit(x)
-  if (perc) {
-    paste0(sym, formatC(100 * x, digits = dec, big.mark = mark, format = "f", ...), "%")
-  } else {
-    paste0(sym, formatC(x, digits = dec, big.mark = mark, format = "f", ...))
-  }
-}
-
-format_df <- function(tbl, dec = NULL, perc = FALSE, mark = "", ...) {
-  frm <- function(x, ...) {
-    if (is_double(x)) {
-      format_nr(x, dec = dec, perc = perc, mark = mark, ...)
-    } else if (is.integer(x)) {
-      format_nr(x, dec = 0, mark = mark, ...)
-    } else {
-      x
-    }
-  }
-  mutate_all(tbl, .funs = funs(frm))
-}
 
 vars <- ""
 var_check(e_vars, colnames(dataset)[-1], int) %>%
@@ -122,14 +61,14 @@ if (all(coeff$p.value == "NaN")) {
   p.small <- coeff$p.value < .001
   coeff[, 2:5] %<>% format_df(dec)
   coeff$p.value[p.small] <- "< .001"
-  coeff.print <- print(rename(coeff, \`  \` = "label", \` \` = "sig_star"), row.names = FALSE)
+  coeff.print <- print(rename(coeff, `  ` = "label", ` ` = "sig_star"), row.names = FALSE)
 }
 
 # Multiple print is still buggy, only last print will be shown -> use print with paste instead
 output <- list(
   paste0("Linear regression (OLS)", "\n"), 
   paste0("Dataset: ", dataset_name, "\n"), 
-  ifelse(data_filter %>% gsub("\s", "", .) != "", 
+  ifelse(data_filter %>% gsub("\\s", "", .) != "", 
     cat("Filter   :", gsub("\n", "", object$data_filter), "\n"), ""
   ), 
   paste0("Response variable    :", r_var, "\n"), 

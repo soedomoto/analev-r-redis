@@ -1,3 +1,18 @@
+window.eval_file = function(filename, params, callback) {    
+  analev_call('module.file.name.eval', [filename, params], function(_req_id, resp) {
+    var resp = JSON.parse(resp);
+    if (resp.success) {
+      if (callback) {
+        callback(resp.data.text);
+      }
+    } else {
+      if (callback) {
+        callback(resp.data.toString());
+      }
+    }
+  });
+}
+
 window.BaseModule = class extends React.Component {
 	constructor(props) {
     super(props);

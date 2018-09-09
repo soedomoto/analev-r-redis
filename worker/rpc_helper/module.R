@@ -56,6 +56,28 @@ module.file.save <- function(file.id, content) {
     cat(content, file=file.loc, sep="\n")
 }
 
+module.file.name.eval <- function(file.name, format.params) {
+    library(readr)
+    library(stringr)
+
+    db <- database.mysql()
+    rs <- dbSendQuery(db, paste0('SELECT id, module_id, extension FROM module_file_model WHERE filename = "', file.name, '"'))
+    row <- dbFetch(rs)
+    dbClearResult(rs)
+
+    file.loc <- file.path(module.dir, row$module_id, paste0(row$id, '.', row$extension))
+    file.content <- read_file(file.loc)
+    for (name in names(format.params)) {
+        file.content <- str_replace_all(file.content, paste0('\\{', name, '\\}'), format.params[[name]])
+    }
+
+    # return(file.content)
+
+    # redis$LPUSH("log", paste(script.name(), paste0("[", req.sess, "]"), "-", paste0("Executing command...\n", file.content)))
+    redis$LPUSH(paste0("req-", req.sess), toJSON(list('id'=req.id, 'cmd'=file.content)))
+    return(as.logical(0))
+}
+
 module.file.ui.read <- function(mod.id) {
     library(readr)
 

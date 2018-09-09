@@ -97,10 +97,10 @@ while(1) {
                 # resp.obj <<- evaluate(req.cmd, envir=environment())
                 # resp.obj <<- evals(req.cmd, parse=TRUE)
                 # resp.obj <<- (Rserve.eval(parse(text=req.cmd)))
-                redis$LPUSH("log", paste(capture.output(resp.obj), collapse = '\n'))
 
                 eval(parse(text='dev.off()'))
 
+                redis$LPUSH("log", paste(capture.output(resp.obj), collapse = '\n'))
                 resp.obj <<- process.response(resp.obj, err.code)
             }
 
@@ -108,6 +108,9 @@ while(1) {
                 redis$LPUSH("log", paste(script.name(), paste0("[", req.sess, "]"), "-", "Calling function", paste0("\"", req.func, "\""), "..."))
 
                 resp.obj <<- do.call(req.func, as.list(req.args), envir=environment())
+                if(is.logical(resp.obj)) {
+                    if (resp.obj == FALSE) next
+                }
             }
 
         }, error = function(e) {
