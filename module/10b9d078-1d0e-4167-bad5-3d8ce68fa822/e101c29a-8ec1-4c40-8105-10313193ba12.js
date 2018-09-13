@@ -4,15 +4,8 @@ window.LinearRegressionOLS = class extends BaseModule {
     this.state = {
       r_var: null, 
       e_vars: null, 
+      tab: null, 
     };
-  }
-
-  df() {
-    return this.dataset() ? 'df' + this.dataset().idx : null;
-  }
-
-  dataset_name() {
-    return this.dataset().label;
   }
 
   get_r_var() {
@@ -23,18 +16,18 @@ window.LinearRegressionOLS = class extends BaseModule {
     return this.dataset().variables.filter((v) => v != this.state.r_var);
   }
 
-  componentDidMount() {
-    this.$row = $(this.row);
-    console.log(this.$row)
-    this.$row.on('resize', () => {
-        alert('xxx');
-    });
-  }
+  // componentDidMount() {
+  //   this.$row = $(this.row);
+  //   this.$row.on('resize', () => {
+  //       alert('xxx');
+  //   });
+  // }
+
+
 
   render() {
   	return React.createElement('div', { className: 'row', ref: (el) => this.row = el }, 
       React.createElement('div', { className: 'col-lg-4 col-md-4 col-sm-12 col-xs-12' }, 
-      	// this.render_dataset_selection(), 
         React.createElement(ARFormControl, {
           onInit: (el) => {
             this.dataset_form = el;
@@ -89,6 +82,7 @@ window.LinearRegressionOLS = class extends BaseModule {
             if (! _.isEmpty(el.value())) {
               this.btn_process.show();
               this.state.e_vars = el.value();
+              if (this.btn_process.impl()) this.btn_process.impl().click();
             } else {
               this.btn_process.hide();
               this.state.e_vars = [];
@@ -107,10 +101,32 @@ window.LinearRegressionOLS = class extends BaseModule {
         }), 
         React.createElement(ARFormControl, {
           onInit: (el) => {
+            this.confidence_slider = el;
+          }, 
+          onAfterLoad: (el) => {}, 
+          onChange: (el) => {
+            console.log(el.value())
+            // el.props.onAfterLoad(el);
+          },
+          show: true,
+          title: 'Confidence Level', 
+          help: 'Select confidence level', 
+          class: ARSlider, 
+          class_props: {
+            min: 0.8, 
+            max: 0.99, 
+            step: 0.01, 
+            value: 0.95
+          }
+        }), 
+        React.createElement(ARFormControl, {
+          onInit: (el) => {
             this.btn_process = el;
           }, 
           onClick: () => {
-            this.process_summarize();
+            if (this.state.tab == 'summary') this.process_summarize();
+            if (this.state.tab == 'predict') this.process_predict();
+            if (this.state.tab == 'plot') this.process_plot();
           }, 
           show: false,
           class: ARButton, 
@@ -120,20 +136,42 @@ window.LinearRegressionOLS = class extends BaseModule {
         }), 
       ), 
       React.createElement('div', { className: 'col-lg-8 col-md-8 col-sm-12 col-xs-12' }, 
-        React.createElement(ReactCodeMirror, { ref: (el) => this.textarea = el })
+        React.createElement(ARTabs, { onChange: (tabs) => {
+          this.state.tab = tabs.state.key;
+
+          if (tabs.state.key == 'predict') {
+            this.confidence_slider.show();
+          } else {
+            this.confidence_slider.hide();
+          }
+        } }, 
+          React.createElement(ReactCodeMirror, { key: 'summary', title: 'Summary', ref: (el) => this.summary_ta = el }), 
+          React.createElement(ReactCodeMirror, { key: 'predict', title: 'Predict', ref: (el) => this.predict_ta = el }), 
+          React.createElement(ReactCodeMirror, { key: 'plot', title: 'Plot', ref: (el) => this.plot_ta = el })
+        ), 
       )
     )
   }
 
   process_summarize() {
+    if (!this.dataset_var() || !this.state.r_var || !this.state.e_vars || !this.dataset_name()) return false;
+
     eval_file('summary', {
-        dataset: this.df(), 
+        dataset: this.dataset_var(), 
         r_var: this.state.r_var, 
         e_vars: this.state.e_vars.join(':'), 
         dataset_name: this.dataset_name()
       }, (data) => {
-        this.textarea.value(data);
+        this.summary_ta.value(data);
       });
+  }
+
+  process_predict() {
+
+  }
+
+  process_plot() {
+
   }
 }
 

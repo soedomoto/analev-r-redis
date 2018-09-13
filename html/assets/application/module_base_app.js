@@ -26,10 +26,6 @@ window.BaseModule = class extends React.Component {
     return this.props.app;
   }
 
-  // datasets() {
-  //   return this.app().state.datasets;
-  // }
-
   datasets() {
     var selecteds = {};
     this.app().selected_dataset_ids().forEach((id) => {
@@ -41,6 +37,91 @@ window.BaseModule = class extends React.Component {
 
   dataset() {
     return this.state.dataset_id ? this.datasets()[this.state.dataset_id] : null;
+  }
+
+  dataset_var() {
+    return this.dataset() ? 'df' + this.dataset().idx : null;
+  }
+
+  dataset_name() {
+    return this.dataset().label;
+  }
+}
+
+window.ARTabs = class extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      key: null, 
+    };
+
+    if (this.props.onInit) this.props.onInit(this);
+  }
+
+  componentDidMount() {
+    if (this.props.children.length > 0 && this.state.key == null) {
+      this.setState({key: this.props.children[0].key ? this.props.children[0].key : 1});
+    }
+  }
+
+  componentDidUpdate() {
+    if (this.props.onChange) this.props.onChange(this);
+  }
+
+  render() {
+    return React.createElement(ReactBootstrap.Tabs, {
+        id: 'tabs', 
+        activeKey: this.state.key, 
+        onSelect: (key) => {
+          this.setState({key: key});
+        }
+      }, 
+      this.props.children.map((el, idx) => React.createElement(ReactBootstrap.Tab, {
+        key: el.key ? el.key : (idx+1), eventKey: el.key ? el.key : (idx+1), title: el.props.title ? el.props.title : 'Tab ' + (idx+1)
+      }, el))
+    );
+  }
+}
+
+window.ARSlider = class extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      value: this.props.value || 5
+    };
+
+    if (this.props.onInit) this.props.onInit(this);
+  }
+
+  componentWillMount() {
+    if (this.props.onBeforeLoad) this.props.onBeforeLoad(this);
+  }
+
+  componentDidMount() {
+    if (this.props.onAfterLoad) this.props.onAfterLoad(this);
+  }
+
+  componentDidUpdate() {
+    if ((! this.last_value) || (this.last_value != this.state.value)) {
+      this.last_value = this.state.value;
+      this.props.onChange(this);
+    }
+  }
+
+  value() {
+    return this.state.value;
+  }
+
+  render() {
+    return React.createElement(Slider.default, {
+      min: this.props.min || 0, 
+      max: this.props.max || 10, 
+      step: this.props.step || 1, 
+      value: this.state.value, 
+      onChange: (value) => {
+        this.setState({value: value});
+      }, 
+    });
   }
 }
 
@@ -74,6 +155,10 @@ window.ARButton = class extends React.Component {
 
   label() {
     return this.state.label;
+  }
+
+  click() {
+    if(this.props.onClick) this.props.onClick();
   }
 
   render() {
@@ -182,6 +267,10 @@ window.ARFormControl = class extends React.Component {
 
   hide() {
     this.setState({show: false});
+  }
+
+  impl() {
+    return this.class_impl;
   }
 
   render() {

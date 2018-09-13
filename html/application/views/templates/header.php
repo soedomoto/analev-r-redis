@@ -26,6 +26,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.9/summernote.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.35.0/codemirror.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.39.0/addon/scroll/simplescrollbars.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/react-rangeslider/umd/rangeslider.min.css" rel="stylesheet">
     <link href="<?php echo assets_url() ?>/webstrotadmin/css/lib/menubar/sidebar.css" rel="stylesheet">
     <link href="<?php echo assets_url() ?>/webstrotadmin/css/style.css" rel="stylesheet">
     
@@ -34,6 +35,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/16.4.2/umd/react.development.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/16.4.2/umd/react-dom.development.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react-bootstrap/0.32.1/react-bootstrap.min.js"></script>
+    <script src="<?php echo assets_url() ?>/rc-slider/bundle.js"></script>
     
     <style type="text/css">
         html, body {
