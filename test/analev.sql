@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: db
--- Generation Time: Sep 09, 2018 at 05:03 PM
+-- Generation Time: Sep 14, 2018 at 09:27 AM
 -- Server version: 5.7.23
 -- PHP Version: 7.2.2
 
@@ -11,12 +11,6 @@ SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET AUTOCOMMIT = 0;
 START TRANSACTION;
 SET time_zone = "+00:00";
-
-
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
 
 --
 -- Database: `analev`
@@ -31,7 +25,7 @@ SET time_zone = "+00:00";
 CREATE TABLE `data_model` (
   `id` varchar(36) NOT NULL,
   `location` varchar(255) NOT NULL,
-  `extension` varchar(20) NOT NULL,
+  `extension` varchar(10) NOT NULL,
   `label` varchar(255) NOT NULL,
   `r_handler` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -73,6 +67,7 @@ INSERT INTO `data_model` (`id`, `location`, `extension`, `label`, `r_handler`) V
 ('875d83f1-705a-4326-b71e-7ee7a33d3ec9', 'se/2016/1307-SE2016-Listing.sav', 'sav', '1307-SE2016-Listing.sav', 'read.spss(data.path(?), to.data.frame=TRUE)'),
 ('87a7b679-f5db-48d6-946f-581fd7e41a39', 'ndc-codes.xlsx', 'xlsx', 'ndc-codes.xlsx', ''),
 ('92db6d93-3ebb-4a33-acfa-5426946fba16', 'populasi.csv', 'csv', 'populasi.csv', 'read.csv(data.path(?),header=TRUE)'),
+('978587ae-9b67-485f-bf43-9361fc09cdc5', 'diamonds.csv', 'csv', 'diamonds.csv', 'read.csv(data.path(?),header=TRUE)'),
 ('a057d9fb-9c9c-4bad-b8fc-b85dad1a49bf', 'se/2016/1308-SE2016-Listing.sav', 'sav', '1308-SE2016-Listing.sav', 'read.spss(data.path(?), to.data.frame=TRUE)'),
 ('a0d7f4f0-be95-4635-b021-158f5563eefa', 'sakernas/2015/sakernas201508_10+_20151125_13.sav', 'sav', 'sakernas201508_10+_20151125_13.sav', 'read.spss(data.path(?), to.data.frame=TRUE)'),
 ('a1153be4-37f1-4db4-bd7f-2f496e032c3d', 'podes/2014/Podes2014-Kecamatan (Sumatera Barat).sav', 'sav', 'Podes2014-Kecamatan (Sumatera Barat).sav', 'read.spss(data.path(?), to.data.frame=TRUE)'),
@@ -106,7 +101,6 @@ INSERT INTO `data_model` (`id`, `location`, `extension`, `label`, `r_handler`) V
 ('f59fdf62-bc9f-4ddd-99fc-03d2864610b2', 'se/2016/Rawdata SE2016L.sav', 'sav', 'Rawdata SE2016L.sav', 'read.spss(data.path(?), to.data.frame=TRUE)'),
 ('f5cd9c47-0813-4a9e-99da-e2e09ad02faf', 'podes/2014/Podes2014-Desa+Nagari+Jorong.sav', 'sav', 'Podes2014-Desa+Nagari+Jorong.sav', 'read.spss(data.path(?), to.data.frame=TRUE)'),
 ('f7fe2c74-0cce-48e3-b12c-cfcc8c336802', 'pwt90.xlsx', 'xlsx', 'pwt90.xlsx', ''),
-('f954975c-2bb7-4b66-8a65-901293851860', 'diamonds.csv', 'csv', 'Diamond', 'read.csv(data.path(?))'),
 ('fcdb5435-a6f7-4d9e-b176-92c2c6705d07', 'sp/2010/sp101302#1.sav', 'sav', 'sp101302#1.sav', 'read.spss(data.path(?), to.data.frame=TRUE)'),
 ('fe0cd2a8-18fb-4cef-97a3-ac3ae178251b', 'sp/2010/SP2000-1302.sav', 'sav', 'SP2000-1302.sav', 'read.spss(data.path(?), to.data.frame=TRUE)'),
 ('fee0059e-fa6c-40c0-b72b-4a6757230a06', 'susenas/2017/pph.xls', 'xls', 'pph.xls', '');
@@ -129,7 +123,9 @@ CREATE TABLE `module_file_model` (
 --
 
 INSERT INTO `module_file_model` (`id`, `module_id`, `filename`, `extension`) VALUES
+('2f2cdcc9-5d11-4c49-84e1-302048f2e884', '10b9d078-1d0e-4167-bad5-3d8ce68fa822', 'plot', 'R'),
 ('6d61052b-85bb-4f48-998b-8d561fbc65d9', '10b9d078-1d0e-4167-bad5-3d8ce68fa822', 'summary', 'R'),
+('a93e4bfc-0101-440a-a1e3-9fbfbb5f4976', '10b9d078-1d0e-4167-bad5-3d8ce68fa822', 'predict', 'R'),
 ('e101c29a-8ec1-4c40-8105-10313193ba12', '10b9d078-1d0e-4167-bad5-3d8ce68fa822', 'ui', 'js');
 
 -- --------------------------------------------------------
@@ -141,15 +137,34 @@ INSERT INTO `module_file_model` (`id`, `module_id`, `filename`, `extension`) VAL
 CREATE TABLE `module_model` (
   `id` varchar(36) NOT NULL,
   `name` varchar(255) NOT NULL,
-  `label` varchar(255) NOT NULL
+  `label` varchar(255) NOT NULL,
+  `owner` varchar(36) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `module_model`
 --
 
-INSERT INTO `module_model` (`id`, `name`, `label`) VALUES
-('10b9d078-1d0e-4167-bad5-3d8ce68fa822', 'LinearRegressionOLS', 'Linear Regression (OLS)');
+INSERT INTO `module_model` (`id`, `name`, `label`, `owner`) VALUES
+('10b9d078-1d0e-4167-bad5-3d8ce68fa822', 'LinearRegressionOLS', 'Linear Regression (OLS)', '4a4a62e4-1aed-4363-9dfd-cef6ae7fdabe');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `user_model`
+--
+
+CREATE TABLE `user_model` (
+  `id` varchar(36) NOT NULL,
+  `fullname` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `user_model`
+--
+
+INSERT INTO `user_model` (`id`, `fullname`) VALUES
+('4a4a62e4-1aed-4363-9dfd-cef6ae7fdabe', 'Aris Prawisudatama');
 
 --
 -- Indexes for dumped tables
@@ -172,8 +187,10 @@ ALTER TABLE `module_file_model`
 --
 ALTER TABLE `module_model`
   ADD PRIMARY KEY (`id`);
-COMMIT;
 
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+--
+-- Indexes for table `user_model`
+--
+ALTER TABLE `user_model`
+  ADD PRIMARY KEY (`id`);
+COMMIT;
