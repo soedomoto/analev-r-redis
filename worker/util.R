@@ -90,3 +90,28 @@ format_df <- function(tbl, dec = NULL, perc = FALSE, mark = "", ...) {
   }
   mutate_all(tbl, .funs = funs(frm))
 }
+
+sshhr <- function(...) suppressWarnings(suppressMessages(...))
+
+is_not <- function(x) {
+  length(x) == 0 || (length(x) == 1 && is.na(x))
+}
+
+is_empty <- function(x, empty = "\\s*") {
+  is_not(x) || (length(x) == 1 && grepl(paste0("^", empty, "$"), x))
+}
+
+ci_label <- function(alt = "two.sided", cl = .95, dec = 3) {
+  if (alt == "less") {
+    c("0%", paste0(100 * cl, "%"))
+  } else if (alt == "greater") {
+    c(paste0(100 * (1 - cl), "%"), "100%")
+  } else {
+    {
+      100 * (1 - cl) / 2
+    } %>%
+      c(., 100 - .) %>%
+      round(dec) %>%
+      paste0(., "%")
+  }
+}

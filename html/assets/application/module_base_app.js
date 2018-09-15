@@ -1,4 +1,9 @@
-window.eval_file = function(filename, params, callback) {    
+window.eval_file = function(filename, params, callback) { 
+  // Ensure all values is string
+  Object.keys(params).forEach((k) => {
+    params[k] = params[k] + "";
+  });
+
   analev_call('module.file.name.eval', [filename, params], function(_req_id, resp) {
     var resp = JSON.parse(resp);
     if (resp.success) {

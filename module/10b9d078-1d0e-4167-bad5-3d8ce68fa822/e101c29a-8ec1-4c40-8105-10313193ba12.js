@@ -169,10 +169,15 @@ window.LinearRegressionOLS = class extends BaseModule {
   process_predict() {
     eval_file('predict', {
         dataset: this.dataset_var(), 
-        pred_data: 'carat', 
-        conf_lev: 0.95
+        dataset_name: this.dataset_name(), 
+        data_filter: "", 
+        r_var: this.state.r_var, 
+        e_vars: this.state.e_vars.join(':'), 
+        n: 10, 
+        // pred_data: 'carat', 
+        // conf_lev: 0.95
       }, (data) => {
-        
+        this.predict_ta.value(data);
       });
   }
 

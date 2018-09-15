@@ -49,7 +49,7 @@ if (nrow(model$model) <= (length(e_vars) + 1)) {
   stop("Insufficient observations to estimate model\n")
 }
 
-e_vars <- strsplit(e_vars, ":")
+e_vars <- unlist(strsplit(e_vars, ":"))
 expl_var <- if (length(e_vars) == 1) e_vars else "x"
 coeff$label %<>% format(justify = "left")
 
