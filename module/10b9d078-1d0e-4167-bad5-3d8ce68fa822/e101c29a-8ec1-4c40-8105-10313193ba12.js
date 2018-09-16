@@ -4,6 +4,7 @@ window.LinearRegressionOLS = class extends BaseModule {
     this.state = {
       r_var: null, 
       e_vars: null, 
+      conf_lev: 0.95, 
       tab: null, 
     };
   }
@@ -105,8 +106,8 @@ window.LinearRegressionOLS = class extends BaseModule {
           }, 
           onAfterLoad: (el) => {}, 
           onChange: (el) => {
-            console.log(el.value())
-            // el.props.onAfterLoad(el);
+            this.state.conf_lev = el.value();
+
           },
           show: true,
           title: 'Confidence Level', 
@@ -116,7 +117,7 @@ window.LinearRegressionOLS = class extends BaseModule {
             min: 0.8, 
             max: 0.99, 
             step: 0.01, 
-            value: 0.95
+            value: this.state.conf_lev
           }
         }), 
         React.createElement(ARFormControl, {
@@ -145,9 +146,9 @@ window.LinearRegressionOLS = class extends BaseModule {
             this.confidence_slider.hide();
           }
         } }, 
-          React.createElement(ReactCodeMirror, { key: 'summary', title: 'Summary', ref: (el) => this.summary_ta = el }), 
-          React.createElement(ReactCodeMirror, { key: 'predict', title: 'Predict', ref: (el) => this.predict_ta = el }), 
-          React.createElement(ReactCodeMirror, { key: 'plot', title: 'Plot', ref: (el) => this.plot_ta = el })
+          React.createElement(ARCodeMirror, { key: 'summary', title: 'Summary', ref: (el) => this.summary_ta = el }), 
+          React.createElement(ARCodeMirror, { key: 'predict', title: 'Predict', ref: (el) => this.predict_ta = el }), 
+          React.createElement(ARImage, { key: 'plot', title: 'Plot', ref: (el) => this.plot_ta = el })
         ), 
       )
     )
@@ -173,16 +174,23 @@ window.LinearRegressionOLS = class extends BaseModule {
         data_filter: "", 
         r_var: this.state.r_var, 
         e_vars: this.state.e_vars.join(':'), 
+        conf_lev: this.state.conf_lev, 
         n: 10, 
-        // pred_data: 'carat', 
-        // conf_lev: 0.95
       }, (data) => {
         this.predict_ta.value(data);
       });
   }
 
   process_plot() {
-
+    eval_file('plot', {
+        dataset: this.dataset_var(), 
+        dataset_name: this.dataset_name(), 
+        r_var: this.state.r_var, 
+        e_vars: this.state.e_vars.join(':'), 
+        conf_lev: this.state.conf_lev, 
+      }, (data) => {
+        this.plot_ta.set_src_base64(data);
+      });
   }
 }
 

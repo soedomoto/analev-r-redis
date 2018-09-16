@@ -87,18 +87,15 @@ while(1) {
                 redis$LPUSH("log", paste(script.name(), paste0("[", req.sess, "]"), "-", "Executing command..."))
                 redis$LPUSH("log", capture.output(req.cmd))
 
-                eval(parse(text='png(file="tmp.png")'))
+                # eval(parse(text='png(file="tmp.png")'))
 
-                if (grepl('ggplot', req.cmd, fixed=TRUE)) {
-                    req.cmd <<- paste(req.cmd, '\n', 'ggsave("tmp.png")', sep='')
-                }
+                # if (grepl('ggplot', req.cmd, fixed=TRUE)) {
+                #     req.cmd <<- paste0(req.cmd, '\n', 'ggsave("tmp.png")')
+                # }
 
                 resp.obj <<- eval(parse(text=req.cmd))
-                # resp.obj <<- evaluate(req.cmd, envir=environment())
-                # resp.obj <<- evals(req.cmd, parse=TRUE)
-                # resp.obj <<- (Rserve.eval(parse(text=req.cmd)))
 
-                eval(parse(text='dev.off()'))
+                # eval(parse(text='dev.off()'))
 
                 redis$LPUSH("log", paste(capture.output(resp.obj), collapse = '\n'))
                 resp.obj <<- process.response(resp.obj, err.code)

@@ -66,7 +66,13 @@ module.file.name.eval <- function(file.name, format.params) {
     dbClearResult(rs)
 
     file.loc <- file.path(module.dir, row$module_id, paste0(row$id, '.', row$extension))
-    file.content <- read_file(file.loc)
+
+    # file.content <- read_file(file.loc)
+    # file.content <- gsub(pattern = "#[^\\\n]*", replacement = "", x = read_file(file.loc))
+    file.lines <- read_lines(file=file.loc)
+    fn <- function(x) gsub(pattern = "#[^*]*", replacement = "", x = x)
+    file.content <- paste(sapply(file.lines, fn), collapse="\n")
+
     for (name in names(format.params)) {
         file.content <- str_replace_all(file.content, paste0('\\{', name, '\\}'), format.params[[name]])
     }

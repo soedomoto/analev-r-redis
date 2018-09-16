@@ -287,7 +287,7 @@ window.ARFormControl = class extends React.Component {
   }
 }
 
-window.ReactCodeMirror = class extends React.Component {
+window.ARCodeMirror = class extends React.Component {
   constructor(props) {
     super(props);
     this.state = {};
@@ -325,6 +325,31 @@ window.ReactCodeMirror = class extends React.Component {
     return React.createElement('textarea', {
       ref: (el) => this.el = el, 
     });
+  }
+}
+
+window.ARImage = class extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {};
+
+    if (this.props.onInit) this.props.onInit(this);
+  }
+
+  componentDidMount() {
+    this.$el = $(this.el);
+  }
+
+  set_src(src) {
+    this.$el.attr('src', src);
+  }
+
+  set_src_base64(src) {
+    this.$el.attr('src', 'data:image/png;base64, ' + src);
+  }
+
+  render() {
+    return React.createElement('img', _.assign({ref: el => this.el = el}, this.props));
   }
 }
 

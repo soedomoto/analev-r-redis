@@ -12,7 +12,7 @@ strevar <- "{e_vars}"
 interval <- "confidence"
 n <- {n}
 se <- TRUE
-conf_lev <- 0.95
+conf_lev <- {conf_lev}
 
 output <- list()
 pred <- get_data(x, c(r_var, e_vars))
@@ -46,8 +46,8 @@ pfun <- function(model, pred, se, conf_lev) {
 }
 
 # Model
-vars <- ""
-var_check(strevar, colnames(x)[-1], int) %>% {vars <<- .$vars}
+vars <- evar
+# var_check(strevar, colnames(x)[-1], int) %>% {vars <<- .$vars}
 
 form_upper <- paste(rvar, "~", paste(vars, collapse = " + ")) %>% as.formula()
 model <- lm(form_upper, data = x)
@@ -73,14 +73,12 @@ if (nrow(x) > n) {
 
 output <- list.append(output, "\n")
 
-# # Calculate prediction
-# pred_names <- colnames(pred)
-# pred <- try(select_at(pred, .vars = evar), silent = TRUE)
-# pred <- na.omit(pred)
-# pred_val <- pfun(model, x, se = se, conf_lev = conf_lev)
-# pred <- data.frame(pred, pred_val, check.names = FALSE, stringsAsFactors = FALSE)
-
-output <- list.append(output, paste(capture.output(model$model), collapse="\n"))
+# Calculate prediction
+pred_names <- colnames(pred)
+pred <- try(select_at(pred, .vars = vars), silent = TRUE)
+pred <- na.omit(pred)
+pred_val <- pfun(model, x, se = se, conf_lev = conf_lev)
+pred <- data.frame(pred, pred_val, check.names = FALSE, stringsAsFactors = FALSE)
 
 # Print result
 pred.print <- head(pred, n) %>%
