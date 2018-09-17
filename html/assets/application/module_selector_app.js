@@ -195,12 +195,15 @@ class ModuleSelectorApp extends React.Component {
           (this.app() ? 
             Object.keys(this.app().state.modules).map((id) => 
               React.createElement(ReactBootstrap.ListGroupItem, {
-                key: id, 
-                href: '#', 
-                onClick: () => {
-                  this.select_module(id);
-                }
-              }, this.app().state.modules[id].label)
+                  key: id, 
+                  href: '#', 
+                  onClick: () => {
+                    this.select_module(id);
+                  }
+                }, 
+                this.app().state.modules[id].label, 
+                React.createElement('span', {}, ' by ' + this.app().state.modules[id].owner_name)
+              )
             ) : null
           )
         )

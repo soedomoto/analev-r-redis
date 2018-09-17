@@ -735,3 +735,6 @@ print(grid.arrange(grobs = plot_list, ncol = nrCol))
 dev.off()
 
 print(paste(output, collapse=""))
+
+
+

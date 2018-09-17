@@ -1,33 +1,11 @@
 <?php $this->load->view('templates/header'); ?>
 <?php $this->load->view('developer/menu'); ?>
 
-<!-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script> -->
-
 <script type="text/javascript" src="https://cdn.webix.com/edge/webix.js"></script>
 <link rel="stylesheet" type="text/css" href="https://cdn.webix.com/edge/webix.css">
 
-<script type="text/javascript" src="https://cdn.webix.com/components/ace/ace.js"></script>
-<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/ace/1.3.3/ace.js">
-<!-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.3/ace.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.3/ext-modelist.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.3/ext-themelist.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.3/ext-language_tools.js"></script> -->
-
-<script type="text/javascript">
-	webix.codebase = "https://cdn.webix.com/components/ace/";
-
-	// var basePath = "https://cdnjs.cloudflare.com/ajax/libs/ace/1.3.3/";
-	// ace.config.set("basePath", basePath);
- //  ace.config.set("modePath", basePath);
- //  ace.config.set("workerPath", basePath);
- //  ace.config.set("themePath", basePath);
-</script>
-
-<style type="text/css">
-	.ace_editor {
-    font-size: 11px !important;
-	}
-</style>
+<script>var require = { paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.14.3/min/vs' } };</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.14.3/min/vs/editor/editor.main.css">
 
 <div class="content-wrap">
   <div class="main">
@@ -63,21 +41,73 @@
 </div>
 
 <script type="text/javascript">
+	webix.protoUI({
+		name:"monaco-editor", 
+		defaults:{
+			on: {
+				'onChange' : function(e) {}
+			}
+		},       
+		$init:function(config){ 
+			this._waitEditor = webix.promise.defer();
+			this.$ready.push(this._render_cm_editor);
+		},
+		_render_cm_editor: function() {
+			webix.require([
+				"https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.14.3/min/vs/loader.js", 
+				"https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.14.3/min/vs/editor/editor.main.nls.js", 
+				"https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.14.3/min/vs/editor/editor.main.js"
+			], this._render_when_ready, this);
+		}, 
+		_render_when_ready: function() {
+			this._editor = monaco.editor.create(this.$view, {
+				language: 'javascript',
+				automaticLayout: true
+			});
 
+			this._editor.onDidChangeModelContent((e) => {
+	       this.config.on.onChange(e);
+	    });
+
+			this._waitEditor.resolve(this._editor);
+		}, 
+		setValue:function(value, language='javascript'){
+			if(!value && value !== 0) value = "";
+			if(this._editor){
+				this._editor.setValue(value);
+				monaco.editor.setModelLanguage(this._editor.getModel(), language);
+				this._editor.getModel()._resetTokenizationState()
+			}
+		},
+		getValue:function(){
+			return this._editor ? this._editor.getValue() : '';
+		},
+		getEditor:function(waitEditor){
+			return waitEditor?this._waitEditor:this._editor;
+		}
+	}, webix.ui.view); // extended functionality
+</script>
+
+<script type="text/javascript">
     $(function() {
       window.webdis_url = 'http://127.0.0.1:7379';
       window.session_id = '7c3fc291-ea44-4a47-1ef7-3f858a2de404'; //uuid();
+      window.ext_lang_map = {
+      	'js': 'javascript', 
+      	'r': 'r'
+      };
 
       // Hide loading page indicator
       $('.loading-modal').addClass('animated').css('z-index', -1);
 
       webix.ui({
 			  container:"main_content",
-			  height: 400, 
+			  height: 500, 
 			  cols:[
 				  { 
 					  view:"tree", 
 					  id: 'list_modules', 
+					  width: 250, 
 					  data: [{
 					  	id:"root", 
 					  	value:"Modules", 
@@ -90,7 +120,7 @@
 						    if (item.$count == 0) {
 									if ('content' in item) {
 										this.select(id);
-										$$('editor').setValue(item.content);
+										$$('editor').setValue(item.content, window.ext_lang_map[item.extension.toLowerCase()]);
 									}
 						    }
 							}
@@ -110,21 +140,48 @@
     						align:"right", 
     						click: () => {
     							var file_id = $$('list_modules').getSelectedId();
+									var file = $$('list_modules').getItem(file_id);
     							var curr_code = $$('editor').getValue();
 
     							analev_call('module.file.save', [file_id, curr_code], function(_req_id, resp) {
 							      var resp = JSON.parse(resp);
 							      if (resp.success) {
-							        $$('list_modules').updateItem(file_id, {content: curr_code});
+							        $$('list_modules').updateItem(file_id, {
+							        	value: '{0}.{1}'.format(file.filename, file.extension), 
+							        	content: curr_code, 
+							        	remote_content: curr_code
+							        });
 							      }
 							    });
     						}
+    					}, {
+    						view:"button", 
+    						value:"Discard", 
+    						width:100, 
+    						align:"right", 
+    						click: () => {
+    							var file_id = $$('list_modules').getSelectedId();
+									var file = $$('list_modules').getItem(file_id);
+
+									$$('editor').setValue(file.remote_content, window.ext_lang_map[file.extension.toLowerCase()]);
+    						}
     					}]
 						}, {
-							view: "ace-editor",
+							view: "monaco-editor",
 							id: 'editor', 
-							theme: "monokai",
-							mode: "javascript",
+							on: {
+								'onChange': function(e) {
+									var file_id = $$('list_modules').getSelectedId();
+									var file = $$('list_modules').getItem(file_id);
+									var curr_code = $$('editor').getValue();
+									var changes = curr_code != file.remote_content;
+
+									$$('list_modules').updateItem(file_id, {
+										value: changes ? '{0}.{1}*'.format(file.filename, file.extension) : '{0}.{1}'.format(file.filename, file.extension), 
+										content: curr_code
+									});
+								}
+							}
 						}]
 					}
 			  ]
@@ -177,7 +234,10 @@
 							      var resp = JSON.parse(resp);
 							      if (resp.success) {
 							        var file_id = window.fileid_reqid_map[_req_id];
-							        $$('list_modules').updateItem(file_id, {content: resp.data});
+							        $$('list_modules').updateItem(file_id, {
+							        	remote_content: resp.data, 
+							        	content: resp.data
+							        });
 							        delete window.fileid_reqid_map[req_id];
 							      }
 							    }, req_id);

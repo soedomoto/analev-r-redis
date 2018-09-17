@@ -11,7 +11,7 @@ database.mysql <- function() {
 
 module.all <- function() {
     db <- database.mysql()
-    rs <- dbSendQuery(db, 'SELECT id, name, label FROM module_model')
+    rs <- dbSendQuery(db, 'SELECT m.id, m.name, m.label, m.owner AS owner_id, u.fullname AS owner_name FROM module_model m, user_model u WHERE m.owner = u.id')
     rows <- dbFetch(rs)
     dbClearResult(rs)
 

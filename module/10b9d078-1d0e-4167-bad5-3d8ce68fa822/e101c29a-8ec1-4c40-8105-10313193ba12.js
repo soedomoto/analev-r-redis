@@ -8,7 +8,7 @@ window.LinearRegressionOLS = class extends BaseModule {
       tab: null, 
     };
   }
-
+  
   get_r_var() {
     return this.dataset().variables;
   }
@@ -193,5 +193,6 @@ window.LinearRegressionOLS = class extends BaseModule {
       });
   }
 }
+
 
 
