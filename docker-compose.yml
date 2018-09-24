@@ -15,15 +15,6 @@ services:
     ports:
       - "7379:7379"
 
-  php:
-    image: ulsmith/alpine-apache-php7
-    depends_on:
-      - webdis
-    volumes:
-      - ./html:/app/public
-    ports:
-      - "8888:80"
-
   mysql:
     image: mysql:5.7
     environment:
@@ -46,6 +37,18 @@ services:
       - mysql:db
     ports:
       - "8889:80"
+
+  php:
+    image: ulsmith/alpine-apache-php7
+    depends_on:
+      - webdis
+      - mysql    
+    links:
+      - mysql:db
+    volumes:
+      - ./html:/app/public
+    ports:
+      - "8888:80"
 
   worker:
     build: docker_r

@@ -7,6 +7,8 @@ if (! defined('BASEPATH')) {
 if (! function_exists('get_user_from_cookie')) {
     function get_user_from_cookie() {
     	$CI =& get_instance();
+        $CI->load->database();
+        // $CI->load->helper('cookie');
     	
         if (isset($_COOKIE["CommunityBPS"])) {
             $key = "KDKE7483JJSDYF3489JSD793478382938489FJDSKF";
@@ -16,17 +18,10 @@ if (! function_exists('get_user_from_cookie')) {
             $hashkey    = substr($_COOKIE["CommunityBPS"], -32);
 
             if (md5($sessionid . $key) == $hashkey) {
-                $ch = curl_init();
-                curl_setopt($ch, CURLOPT_URL, $CI->config->item("api_url_v2") . '/user/info/nip/' . $nip);
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                
-                $resp = curl_exec ($ch);
-                if ($resp === FALSE)
-                    throw new Exception(curl_error($ch), curl_errno($ch));
-                curl_close($ch);
+                $user = $CI->db->query('SELECT * FROM user_model WHERE LEFT(REPLACE(id, "-", ""), 9) = ?', array($nip))->row();
+                setcookie("CommunityBPS", $_COOKIE["CommunityBPS"], time() + 7200, '/');
 
-                $resp = json_decode($resp);
-                return $resp->data;
+                return $user;
             }
         }
 

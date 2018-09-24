@@ -24,8 +24,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 |
 */
 $config['base_url'] = 'http://localhost:8888/';
-$config['api_url'] = 'http://localhost/api/v1/';
-$config['api_url_v2'] = 'http://localhost/api/v2/';
 
 /*
 |--------------------------------------------------------------------------

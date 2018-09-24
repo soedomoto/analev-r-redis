@@ -1,4 +1,4 @@
-    <style type="text/css">
+    <!-- <style type="text/css">
         #alert_feedback {
             position: fixed;
             bottom: 0px;
@@ -53,116 +53,11 @@
 
     <div id="btn_alert_feedback" class="pull-right animated slideOutDown">
         <a href="#" id="ln_alert_feedback">Feedback</a>
-    </div>
+    </div> -->
     
     <script>
-        function submit_feedback(url, data, finished, gfailed) {
-            function failed(message) {
-                sweetAlert('Terjadi kesalahan dalam penyimpanan feedback dengan pesan kesalahan \'' + message + '\'. Silahkan simpan ulang atau reload halaman. Jika masalah masih berlanjut, silahkan hubungi administrator !', "error")
-                    .then(function() {
-                        if (gfailed) gfailed();
-                    });
-            }
-            
-            ajax_post(url, data, function(resp) {
-                if (resp.success) {
-                    finished(resp.data);
-                } else {
-                    failed(resp.message);
-                }
-            }, function(message) {
-                failed(message);
-            });
-        }
-
-        $('#feedback_dialog').on('show.bs.modal', function () {
-            var $modal = $(this), 
-                $feedback = $modal.find('[name=feedback]').summernote();
-
-            $(this).find('form')
-                .unbind('submit')
-                .bind('submit', function (e) {
-                    e.preventDefault();
-                    $form = $(this);
-                    
-                    // Change hash
-                    location.hash = '#save-feedback';
-                    
-                    swal({
-                        title: "Menyimpan...", 
-                        showCancelButton: false, 
-                        showConfirmButton: false, 
-                        content: {
-                            element: "img",
-                            attributes: {
-                              src: "<?php echo assets_url() ?>/loading-200px.gif"
-                            },
-                          },
-                    }).then(function() {
-                        location.hash = '';
-                    });
-
-                    submit_feedback($(this).attr('action'), {'feedback': $feedback.val()}, function saved() {
-                        swal.close();
-
-                        swal("Feedback Anda telah disimpan. Terima kasih atas partisipasi Anda", {
-                            icon: "success",
-                        }).then(function() {
-                            $('#feedback_dialog').modal('hide');
-                        });
-                    });
-                    
-                    return false;
-                });
-        });
-
-        $('#feedback_dialog').on('hidden.bs.modal', function () {
-            $('[name=feedback]').each(function() {
-                $(this).summernote('destroy');
-            });
-            location.hash = '';
-        });
-
         $(function() {
             Pace.on('done', function() {});
-
-            $('#alert_feedback .close').on('click', function(e) {
-                e.preventDefault();
-                $('#alert_feedback').addClass('slideOutDown');
-                $('#btn_alert_feedback').removeClass('slideOutDown').addClass('slideInUp');
-                return false;
-            });
-
-            setTimeout(function() { $('#alert_feedback .close').trigger('click'); }, 3000);
-
-            $('#btn_alert_feedback a').on('click', function(e) {
-                e.preventDefault();
-                $('#alert_feedback').removeClass('slideOutDown').addClass('slideInUp');
-                $('#btn_alert_feedback').removeClass('slideInUp').addClass('slideOutDown');
-                return false;
-            });
-
-            $('.ln-feedback').on('click', function(e) {
-                // e.preventDefault();
-                $('#feedback_dialog').modal();
-            });
-
-            // Logger
-            function log_access(url, data, finished, gfailed) {
-                function failed(message) {
-                    console.log('Terjadi kesalahan dalam penyimpanan isian dengan pesan kesalahan \'' + message + '\'. Silahkan simpan ulang atau reload halaman. Jika masalah masih berlanjut, silahkan hubungi administrator !');
-                }
-                
-                ajax_post(url, data, function(resp) {
-                    if (resp.success) {
-                        if(finished) finished(resp.data);
-                    } else {
-                        if(failed) failed(resp.message);
-                    }
-                }, function(message) {
-                    if(failed) failed(message);
-                });
-            }
         });
     </script>
     

@@ -117,7 +117,7 @@ function _wait_for_response(req_id) {
     });
 }
 
-function analev_eval(cmd, callback, req_id = uuid()) {
+window.analev_eval = function(cmd, callback, req_id = uuid()) {
     if (! ('req_callbacks' in window)) window.req_callbacks = {};
     if (! ('req_urls' in window)) window.req_urls = {};
     if (callback) window.req_callbacks[req_id] = callback;
@@ -128,7 +128,7 @@ function analev_eval(cmd, callback, req_id = uuid()) {
     });
 }
 
-function analev_call(func_name, json_params=[], callback, req_id = uuid()) {
+window.analev_call = function(func_name, json_params=[], callback, req_id = uuid()) {
     if (! ('req_callbacks' in window)) window.req_callbacks = {};
     if (! ('req_urls' in window)) window.req_urls = {};
     if (callback) window.req_callbacks[req_id] = callback;
@@ -137,4 +137,40 @@ function analev_call(func_name, json_params=[], callback, req_id = uuid()) {
         if (_req_url) window.req_urls[_req_id] = _req_url;
         _wait_for_response(_req_id);
     });
+}
+
+window.eval_file = function(filename, params, callback) { 
+  // Ensure all values is string
+  Object.keys(params).forEach((k) => {
+    params[k] = params[k] + "";
+  });
+
+  analev_call('module.file.name.eval', [filename, params], function(_req_id, resp) {
+    var resp = JSON.parse(resp);
+    if (resp.success) {
+      if (callback) {
+        callback(resp.data.text);
+      }
+    } else {
+      if (callback) {
+        callback(resp.data.toString());
+      }
+    }
+  });
+}
+
+window.authenticate = function(email, password, callback) {
+  analev_call('user.authenticate', {
+      email: email, 
+      password: password
+    }, 
+    (reqid, resp) => {
+      var resp = JSON.parse(resp);
+      if (resp.success) {
+        if (callback) callback(resp.data, new Date(Date.now() + 2*60*60*1000))
+      } else {
+        console.log(resp.message)
+      }
+    }
+  ); 
 }

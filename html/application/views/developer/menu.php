@@ -11,8 +11,8 @@
 
             <!-- Show on desktop -->
             <ul class="nav navbar-nav hidden-xs">
-                <li><a href="<?php echo base_url() . 'user' ?>">Beranda Pengembang</a></li>
-                <li><a href="<?php echo base_url() . 'user/assessment' ?>">Evaluasi</a></li>
+                <li><a href="<?php echo base_url() . 'developer' ?>">Home</a></li>
+                <li><a href="<?php echo base_url() . 'analyst' ?>">Analyst Page</a></li>
             </ul>
 
             <ul class="nav navbar-nav hidden-xs pull-right">
@@ -23,9 +23,6 @@
                         <span class="user-avatar"> <?php echo isset($user->fullname) ? $user->fullname : ''; ?></span>
                     </span>
                     <ul class="dropdown-menu">
-                        <?php foreach ($other_roles as $role) { ?>
-                            <li><a href="<?php echo base_url() . $role->fallback_page ?>"><i class="ti-user"></i><span>Halaman <?php echo $role->name ?></span></a></li>
-                        <?php } ?>
                         <li><a class="menu-logout" href="<?php echo $logout_url ?>">Logout</a></li>
                     </ul>
                 </li>

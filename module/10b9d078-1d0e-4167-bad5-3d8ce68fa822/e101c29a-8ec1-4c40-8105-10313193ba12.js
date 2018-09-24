@@ -1,3 +1,5 @@
+// ui.js
+
 window.LinearRegressionOLS = class extends BaseModule {
 	constructor(props) {
     super(props);
@@ -193,6 +195,7 @@ window.LinearRegressionOLS = class extends BaseModule {
       });
   }
 }
+
 
 
 

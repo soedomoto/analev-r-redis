@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: db
--- Generation Time: Sep 14, 2018 at 09:27 AM
+-- Generation Time: Sep 24, 2018 at 02:32 AM
 -- Server version: 5.7.23
 -- PHP Version: 7.2.2
 
@@ -11,6 +11,12 @@ SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET AUTOCOMMIT = 0;
 START TRANSACTION;
 SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
 
 --
 -- Database: `analev`
@@ -156,15 +162,18 @@ INSERT INTO `module_model` (`id`, `name`, `label`, `owner`) VALUES
 
 CREATE TABLE `user_model` (
   `id` varchar(36) NOT NULL,
-  `fullname` varchar(255) NOT NULL
+  `fullname` varchar(255) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `password` varchar(100) NOT NULL,
+  `active` tinyint(1) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `user_model`
 --
 
-INSERT INTO `user_model` (`id`, `fullname`) VALUES
-('4a4a62e4-1aed-4363-9dfd-cef6ae7fdabe', 'Aris Prawisudatama');
+INSERT INTO `user_model` (`id`, `fullname`, `email`, `password`, `active`) VALUES
+('4a4a62e4-1aed-4363-9dfd-cef6ae7fdabe', 'Aris Prawisudatama', 'soedomoto@gmail.com', 'b7d517ff31bff1dc9367177f8ed39ceb', 1);
 
 --
 -- Indexes for dumped tables
@@ -194,3 +203,7 @@ ALTER TABLE `module_model`
 ALTER TABLE `user_model`
   ADD PRIMARY KEY (`id`);
 COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
