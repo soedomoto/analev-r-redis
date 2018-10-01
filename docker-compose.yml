@@ -44,6 +44,7 @@ services:
       - webdis
       - mysql    
     links:
+      - webdis:webdis
       - mysql:db
     volumes:
       - ./html:/app/public

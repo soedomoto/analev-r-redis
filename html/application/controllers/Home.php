@@ -10,7 +10,9 @@ class Home extends CI_Controller
 
         $this->load->helper('url_helper');
         $this->load->helper('assets');
+        $this->load->helper('uuid');
         $this->load->helper('cookie');
+        $this->load->helper('session');
         $this->load->library('user_agent');
 
         $this->user = get_user_from_cookie();
@@ -20,6 +22,7 @@ class Home extends CI_Controller
         }
 
         $this->data = array(
+            'broker_url' => $this->config->item("broker_url"), 
             'logout_url' => base_url() . 'user/clogout'
         );
     }

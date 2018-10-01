@@ -37,18 +37,110 @@ function ajax_post(url, json_data, success, fail) {
             resp = JSON.parse(xhr.responseText);
             if (success) success(resp);
         } else {
-            fail(xhr.responseText);
+            if (fail) fail(xhr.responseText);
         }
     };
     xhr.send($.param(json_data));
 }
 
-function _send_cmd_request(req_id, cmd, callback) {
-    message = JSON.stringify({
+function ajax_post_v2(url, data, content_type) {
+    if(typeof data =='object') data = $.param(data);
+        
+    return new Promise((resolve, reject) => {
+        var xhr = new XMLHttpRequest();
+        xhr.url = url;
+        xhr.payload = data;
+        xhr.open('POST', url);
+        xhr.setRequestHeader('Content-Type', content_type || 'application/x-www-form-urlencoded');
+        xhr.onload = function(_xhr) {
+            if (_xhr.currentTarget.status === 200) {
+                resp = _xhr.currentTarget.responseText;
+                resolve({
+                    request: {
+                        url: _xhr.currentTarget.url, 
+                        payload: _xhr.currentTarget.payload
+                    }, 
+                    response: resp
+                });
+            } else {
+                reject({
+                    request: {
+                        url: _xhr.currentTarget.url, 
+                        payload: _xhr.currentTarget.payload
+                    }, 
+                    response: _xhr.currentTarget.responseText
+                });
+            }
+        };
+        xhr.send(data);
+    });
+}
+
+function send_request_v2(message) {
+    return new Promise((resolve, reject) => {
+        ajax_post_v2(window.webdis_url, 'LPUSH/req/' + encodeURIComponent(message), 'text/plain')
+            .then((resp) => {
+                var s_url = new URI(resp.request.url + '/' + resp.request.payload).normalize().toString(), 
+                    parts = s_url.split('/'), 
+                    data = parts[parts.length-1],  
+                    data = decodeURIComponent(data),  
+                    data = JSON.parse(data),  
+                    req_id = data.id, 
+                    j_resp = JSON.parse(resp.response);
+
+                Object.keys(j_resp).forEach(function (op) {
+                    var val = parseInt(j_resp[op]);
+                    if (val <= 0) {
+                        // reject(_.assign(data, { reason: 'Command failed to execute' }));
+                        reject({
+                            request: _.assign(data, { url: s_url }), 
+                            reason: 'Command failed to execute'
+                        });
+                    } else {
+                        resolve({
+                            request: data
+                        });
+                    }
+                });
+            })
+            .catch((resp) => {
+                var s_url = new URI(resp.request.url + '/' + resp.request.payload).normalize().toString(), 
+                    parts = s_url.split('/'), 
+                    data = parts[parts.length-1],  
+                    data = decodeURIComponent(data),  
+                    data = JSON.parse(data);
+
+                reject({
+                    request: data, 
+                    reason: resp.response
+                });
+            });
+    });
+}
+
+function send_cmd_request_v2(req_id, cmd) {
+    var message = JSON.stringify({
         'sess': window.session_id, 'id': req_id, 'cmd': cmd 
     });
 
-    ajax_get(window.webdis_url + '/LPUSH/req/' + encodeURIComponent(message), function (j_resp, s_url) {
+    return send_request_v2(message);
+}
+
+function send_rpc_request_v2(req_id, func_name, params) {
+    var message = JSON.stringify({
+        'sess': window.session_id, 'id': req_id, 'func': func_name, 'args': params
+    });
+
+    return send_request_v2(message);
+}
+
+function _send_cmd_request(req_id, cmd, callback) {
+    var message = JSON.stringify({
+            'sess': window.session_id, 'id': req_id, 'cmd': cmd 
+        }), 
+        redis_cmd = 'LPUSH/req/' + encodeURIComponent(message);
+
+    ajax_get(window.webdis_url + '/' + redis_cmd, function (j_resp, s_url) {
         var parts = s_url.split('/'), 
             data = parts[parts.length-1], 
             data = decodeURIComponent(data), 
@@ -122,10 +214,17 @@ window.analev_eval = function(cmd, callback, req_id = uuid()) {
     if (! ('req_urls' in window)) window.req_urls = {};
     if (callback) window.req_callbacks[req_id] = callback;
 
-    _send_cmd_request(req_id, cmd, function(_req_id, _req_url) {        
-        if (_req_url) window.req_urls[_req_id] = _req_url;
-        _wait_for_response(_req_id);
-    });
+    // _send_cmd_request(req_id, cmd, function(_req_id, _req_url) {        
+    //     if (_req_url) window.req_urls[_req_id] = _req_url;
+    //     _wait_for_response(_req_id);
+    // });
+
+    send_cmd_request_v2(req_id, cmd)
+        .then((resp) => {
+            if (resp.request.url) window.req_urls[resp.request.id] = resp.request.url;
+            _wait_for_response(resp.request.id);
+        })
+        .catch((resp) => {});
 }
 
 window.analev_call = function(func_name, json_params=[], callback, req_id = uuid()) {
@@ -133,10 +232,17 @@ window.analev_call = function(func_name, json_params=[], callback, req_id = uuid
     if (! ('req_urls' in window)) window.req_urls = {};
     if (callback) window.req_callbacks[req_id] = callback;
 
-    _send_rpc_request(req_id, func_name, json_params, function(_req_id, _req_url) {
-        if (_req_url) window.req_urls[_req_id] = _req_url;
-        _wait_for_response(_req_id);
-    });
+    // _send_rpc_request(req_id, func_name, json_params, function(_req_id, _req_url) {
+    //     if (_req_url) window.req_urls[_req_id] = _req_url;
+    //     _wait_for_response(_req_id);
+    // });
+
+    send_rpc_request_v2(req_id, func_name, json_params)
+        .then((resp) => {
+            if (resp.request.url) window.req_urls[resp.request.id] = resp.request.url;
+            _wait_for_response(resp.request.id);
+        })
+        .catch((resp) => {});
 }
 
 window.eval_file = function(filename, params, callback) { 
@@ -159,18 +265,18 @@ window.eval_file = function(filename, params, callback) {
   });
 }
 
-window.authenticate = function(email, password, callback) {
-  analev_call('user.authenticate', {
-      email: email, 
-      password: password
-    }, 
-    (reqid, resp) => {
-      var resp = JSON.parse(resp);
-      if (resp.success) {
-        if (callback) callback(resp.data, new Date(Date.now() + 2*60*60*1000))
-      } else {
-        console.log(resp.message)
-      }
-    }
-  ); 
-}
+// window.authenticate = function(email, password, callback) {
+//   analev_call('user.authenticate', {
+//       email: email, 
+//       password: password
+//     }, 
+//     (reqid, resp) => {
+//       var resp = JSON.parse(resp);
+//       if (resp.success) {
+//         if (callback) callback(resp.data, new Date(Date.now() + 2*60*60*1000))
+//       } else {
+//         console.log(resp.message)
+//       }
+//     }
+//   ); 
+// }

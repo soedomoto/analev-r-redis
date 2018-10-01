@@ -37,7 +37,7 @@
                             </a>
                         </div>
                         <div class="login-form">
-                            <h4>Login</h4>
+                            <h4>Register</h4>
 
                             <?php if (isset($message)) { ?>
                                 <div class="alert alert-<?php echo $message->type ?>">
@@ -45,28 +45,24 @@
                                 </div>
                             <?php } ?>
 
-                            <form method="POST" action="<?php echo base_url() . 'user/clogin' ?>">
+                            <form method="POST" action="<?php echo base_url() . 'user/cregister' ?>">
                                 <div class="form-group">
                                     <label>Email address</label>
-                                    <input name="email" type="email" class="form-control" placeholder="Email">
+                                    <input name="email" type="email" class="form-control" placeholder="Email" value="">
                                 </div>
                                 <div class="form-group">
                                     <label>Password</label>
                                     <input name="password" type="password" class="form-control" placeholder="Password">
                                 </div>
-                                <div class="checkbox">
-                                    <label>
-										<input type="checkbox"> Remember Me
-									</label>
-                                    <label class="pull-right">
-										<a href="#">Forgotten Password?</a>
-									</label>
-
+                                <div class="form-group">
+                                    <label>Firstname</label>
+                                    <input name="firstname" type="text" class="form-control" placeholder="Firstname" value="">
                                 </div>
-                                <button type="submit" class="btn btn-primary btn-flat m-b-30 m-t-30">Sign in</button>
-                                <div class="register-link m-t-15 text-center">
-                                    <p>Don't have account ? <a href="<?php echo base_url() . 'user/register' ?>"> Register Here</a></p>
+                                <div class="form-group">
+                                    <label>Lastname</label>
+                                    <input name="lastname" type="text" class="form-control" placeholder="Lastname" value="">
                                 </div>
+                                <button type="submit" class="btn btn-primary btn-flat m-b-30 m-t-30">Register</button>
                             </form>
                         </div>
                     </div>

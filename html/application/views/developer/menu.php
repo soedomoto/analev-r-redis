@@ -12,7 +12,7 @@
             <!-- Show on desktop -->
             <ul class="nav navbar-nav hidden-xs">
                 <li><a href="<?php echo base_url() . 'developer' ?>">Home</a></li>
-                <li><a href="<?php echo base_url() . 'analyst' ?>">Analyst Page</a></li>
+                <li><a href="<?php echo base_url() ?>">Analyst Page</a></li>
             </ul>
 
             <ul class="nav navbar-nav hidden-xs pull-right">
@@ -33,10 +33,6 @@
         <!-- Show on mobile -->
         <div class="hidden-sm hidden-md hidden-lg hidden-xl collapse" id="navbar-main">
             <ul class="nav navbar-nav navbar-right">
-                <?php foreach ($other_roles as $role) { ?>
-                    <li><a href="<?php echo base_url() . $role->fallback_page ?>">Halaman <?php echo $role->name ?></a></li>
-                <?php } ?>
-                <li class="divider"></li>
                 <li><a class="menu-logout" href="<?php echo $logout_url ?>">Logout</a></li>
             </ul>
         </div>
@@ -45,12 +41,8 @@
         <div class="container navbar-container">
             <div class="navbar-nav-scroll">
                 <ul class="nav navbar-nav flex-row main-menu">
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?php echo base_url() . 'user' ?>">Beranda Pengguna</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?php echo base_url() . 'user/assessment' ?>">Penilaian</a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link" href="<?php echo base_url() . 'developer' ?>">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="<?php echo base_url() ?>">Analyst Page</a></li>
                 </ul>
             </div>
             <!-- /Show on mobile -->
