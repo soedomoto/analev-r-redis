@@ -64,12 +64,19 @@ cat(Sys.getpid(), file=session.pid, sep="\n")
 redis <- redux::hiredis()
 redis$LPUSH("log", paste(script.name(), paste0("[", req.sess, "]"), "-", "Starting..."))
 
-while(1) {
+auto.kill.max.iteration <- Sys.getenv('AUTOKILL_AFTER_ITERATION', 10)
+auto.kill.iteration <- 0 
+is.serving <- 1
+while(is.serving) {
     # Capture input
-    inp.arr <- redis$BRPOP(paste0("req-", req.sess), 60)
+    inp.arr <- redis$BRPOP(paste0("req-", req.sess), 1)
     inp.req <- inp.arr[[2]]
 
-    if (! is.null(inp.req)) {
+    if (is.null(inp.req)) {
+        auto.kill.iteration <<- auto.kill.iteration + 1
+    }
+
+    else {
 
         inp.req <- fromJSON(inp.req)
         req.id <- inp.req$id
@@ -122,6 +129,10 @@ while(1) {
 
         # Save session for next purpose
         save.image(file=session.rdata)
+    }
+
+    if (auto.kill.iteration >= auto.kill.max.iteration) {
+        is.serving <<- 0
     }
 }
 

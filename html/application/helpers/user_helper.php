@@ -6,10 +6,10 @@ if (! defined('BASEPATH')) {
 
 if (! function_exists('register_user')) {
     function register_user($email, $password, $firstname, $lastname) {
-    	$CI =& get_instance();
+        $CI =& get_instance();
         $CI->load->database();
         // $CI->load->helper('cookie');
-    	
+        
         $user = $CI->db
             ->query('SELECT * FROM user_model WHERE email = ?', array($email))
             ->row();
@@ -42,7 +42,7 @@ if (! function_exists('sent_activation_link')) {
             ->row();
         
         // Send activation mail
-        $emailConfig = [
+        $emailConfig = array(
             'protocol' => 'smtp', 
             'smtp_host' => 'ssl://smtp.googlemail.com', 
             'smtp_port' => 465, 
@@ -50,12 +50,12 @@ if (! function_exists('sent_activation_link')) {
             'smtp_pass' => 'python.r', 
             'mailtype' => 'html', 
             'charset' => 'iso-8859-1'
-        ];
+        );
         // Set your email information
-        $from = [
+        $from = array(
             'email' => 'user.analev.r@gmail.com',
             'name' => 'AnalevR'
-        ];
+        );
        
         $to = array($email);
         $subject = 'Activation Link';

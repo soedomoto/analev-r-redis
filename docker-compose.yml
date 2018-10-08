@@ -16,7 +16,7 @@ services:
       - "7379:7379"
 
   mysql:
-    image: mysql:5.7
+    image: mariadb:5.5.61-trusty
     environment:
       - MYSQL_ROOT_PASSWORD=toor
       - MySQL_USER=analev
@@ -65,6 +65,7 @@ services:
       - /media/soedomoto/DATA/PROJECT/2018-analevR/data:/data
       - ./workspace:/workspace
     environment:
+      - AUTOKILL_AFTER_ITERATION=20
       - APP_DIR=/app
       - WORKSPACE_DIR=/workspace
       - DATA_DIR=/data

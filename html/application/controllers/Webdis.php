@@ -14,13 +14,13 @@ class Webdis extends CI_Controller
         $this->load->library('user_agent');
     }
     
-	public function proxy()
-	{
+    public function proxy()
+    {
         error_reporting(E_ALL);
         ini_set('display_errors', 1);
 
-        $request = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-        $request = str_replace(base_url() . $this->router->fetch_class() . '/' . $this->router->fetch_method(), '', $request);
+        $request = isset($_SERVER['ORIG_PATH_INFO']) ? '/' . $_SERVER['ORIG_PATH_INFO'] : $_SERVER['PATH_INFO'];
+        $request = str_replace('/' . $this->router->fetch_class() . '/' . $this->router->fetch_method(), '', $request);
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $this->config->item("webdis_url") . $request);
@@ -58,5 +58,5 @@ class Webdis extends CI_Controller
         }
 
         echo $body;
-	}
+    }
 }
