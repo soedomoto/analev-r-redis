@@ -66,7 +66,6 @@ class myThread (threading.Thread):
                 wait_iter = 0
                 while wait_for_resp:
                     wait_iter += 1
-                    print('{} Wait #{}'.format(self.i, wait_iter))
                     resp = self.get_response()
                     if resp:
                         wait_for_resp = False

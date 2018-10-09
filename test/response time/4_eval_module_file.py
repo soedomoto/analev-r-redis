@@ -4,17 +4,18 @@ from uuid import uuid4
 import requests
 import urllib.parse
 import config
+import time
 
 all_times = []
-for i in range(10):
-    start = datetime.datetime.now()
+for i in range(100):
+    start = time.time()
 
     session_id = config.sessions[1]
     request_id = str(uuid4())
     req = {
         'sess': session_id, 'id': request_id, 'func': 'module.file.name.eval',
         'args': ["summary", {
-            "dataset":"df0",
+            "dataset":"df{}".format(i),
             "dataset_name": "diamonds.csv",
             "r_var":"price",
             "e_vars":"carat:clarity"
@@ -34,10 +35,11 @@ for i in range(10):
                     key, resp = val
                     resp = json.loads(resp)
 
-    stop = datetime.datetime.now()
-    all_times.append((stop-start).microseconds/1000)
+    stop = time.time()
+    duration = (stop - start) * 1000
+    all_times.append(duration)
 
-    print('{}. Time: {}, Result: {}'.format(i+1, (stop-start).microseconds/1000, resp))
+    print('{}. Time: {}, Result: {}'.format(i+1, duration, resp))
 
 print('')
 print('Averange: {}'.format(sum(all_times) / len(all_times)))

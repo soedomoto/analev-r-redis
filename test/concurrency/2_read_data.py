@@ -1,20 +1,13 @@
 import json
 import threading
-import urllib.parse
-from datetime import datetime
-from uuid import uuid4
-import requests
-import config
-
-
-import json
-import threading
-import urllib.parse
 import time
+import urllib.parse
+import urllib.parse
 from uuid import uuid4
-import requests
-import config
 
+import requests
+
+import config
 
 with open('{}.csv'.format(__file__), 'w+') as f:
     f.write('')
@@ -70,7 +63,6 @@ class myThread (threading.Thread):
                 wait_iter = 0
                 while wait_for_resp:
                     wait_iter += 1
-                    print('{} Wait #{}'.format(self.i, wait_iter))
                     resp = self.get_response()
                     if resp:
                         wait_for_resp = False
