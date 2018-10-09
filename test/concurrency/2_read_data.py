@@ -7,6 +7,15 @@ import requests
 import config
 
 
+import json
+import threading
+import urllib.parse
+import time
+from uuid import uuid4
+import requests
+import config
+
+
 with open('{}.csv'.format(__file__), 'w+') as f:
     f.write('')
 
@@ -51,7 +60,7 @@ class myThread (threading.Thread):
         global ss
 
         ss.setdefault(self.i, {})
-        ss[self.i]['start'] = datetime.now()
+        ss[self.i]['start'] = time.time()
 
         resp = None
         need_resend = True
@@ -61,6 +70,7 @@ class myThread (threading.Thread):
                 wait_iter = 0
                 while wait_for_resp:
                     wait_iter += 1
+                    print('{} Wait #{}'.format(self.i, wait_iter))
                     resp = self.get_response()
                     if resp:
                         wait_for_resp = False
@@ -68,12 +78,13 @@ class myThread (threading.Thread):
                     elif wait_iter >= 10:
                         wait_for_resp = False
                         need_resend = True
+                        print('{} Resend'.format(self.i))
 
-        ss[self.i]['stop'] = datetime.now()
-        ms = (ss[self.i]['stop'] - ss[self.i]['start']).microseconds / 1000
+        ss[self.i]['stop'] = time.time()
+        ms = (ss[self.i]['stop'] - ss[self.i]['start']) * 1000
 
         all_times.append(ms)
-        print('{}. Time: {}, Result: {}'.format(self.i, ms, resp))
+        print('{}. Time: {} ms, Result: {}'.format(self.i, ms, resp))
 
         with open('{}.csv'.format(__file__), 'a+') as f:
             f.write('{}\n'.format(ms))

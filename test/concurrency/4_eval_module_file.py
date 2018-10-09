@@ -66,6 +66,7 @@ class myThread (threading.Thread):
                 wait_iter = 0
                 while wait_for_resp:
                     wait_iter += 1
+                    print('{} Wait #{}'.format(self.i, wait_iter))
                     resp = self.get_response()
                     if resp:
                         wait_for_resp = False
@@ -73,6 +74,7 @@ class myThread (threading.Thread):
                     elif wait_iter >= 10:
                         wait_for_resp = False
                         need_resend = True
+                        print('{} Resend'.format(self.i))
 
         ss[self.i]['stop'] = time.time()
         ms = (ss[self.i]['stop'] - ss[self.i]['start']) * 1000

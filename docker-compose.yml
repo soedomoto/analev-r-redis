@@ -66,6 +66,7 @@ services:
       - ./workspace:/workspace
     environment:
       - AUTOKILL_AFTER_ITERATION=20
+      - MAX_WORKER=10
       - APP_DIR=/app
       - WORKSPACE_DIR=/workspace
       - DATA_DIR=/data

@@ -1,3 +1,15 @@
+is_windows <- function () (tolower(.Platform$OS.type) == "windows")
+
+R_binary <- function () {
+  R_exe <- ifelse (is_windows(), "R.exe", "R")
+  return(file.path(R.home("bin"), R_exe))
+}
+
+Rscript_binary <- function () {
+  R_exe <- ifelse (is_windows(), "Rscript.exe", "Rscript")
+  return(file.path(R.home("bin"), R_exe))
+}
+
 Sys_getenv <- function(x, unset = NULL) {
   ret <- Sys.getenv(x, NA_character_)
   if (is.na(ret)) unset else ret
