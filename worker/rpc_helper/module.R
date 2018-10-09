@@ -210,8 +210,8 @@ module.file.name.eval <- function(file.name, format.params) {
 
     # return(file.content)
 
-    # redis$LPUSH("log", paste(script.name(), paste0("[", req.sess, "]"), "-", paste0("Executing command...\n", file.content)))
-    redis$LPUSH(paste0("req-", req.sess), toJSON(list('id'=req.id, 'cmd'=file.content)))
+    # conn$LPUSH("log", paste(script.name(), paste0("[", req.sess, "]"), "-", paste0("Executing command...\n")))
+    conn$LPUSH(paste0("worker-req"), toJSON(list(sess=req.sess, 'id'=req.id, 'cmd'=file.content)))
     return(as.logical(0))
 }
 

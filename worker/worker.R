@@ -62,11 +62,15 @@ while(1) {
 			    # load(file=session.rdata)
 			    # setwd(session.dir)
 
-			    
-				load(file=session.rdata, envir = working.env)
+			    e <- new.env()
+				load(file=session.rdata, envir = e)
+				working.env <<- e$working.env
 			}
 
 			# session.pid <- file.path(session.dir, 'pid.pid')
+			working.env$req.sess = req.sess
+			working.env$req.id = req.id
+			working.env$conn = conn
 
 			# Processing
 	        err.code <- 0
@@ -84,7 +88,7 @@ while(1) {
 	                #     req.cmd <<- paste0(req.cmd, '\n', 'ggsave("tmp.png")')
 	                # }
 
-	                resp.obj <<- eval(parse(text=req.cmd), envir = working.env)
+	                resp.obj <<- eval(parse(text=req.cmd), envir=working.env)
 
 	                # eval(parse(text='dev.off()'))
 
@@ -95,11 +99,17 @@ while(1) {
 	            else if (! is.null(req.func)) {
 	                conn$LPUSH("log", paste(script.name(), paste0("[", req.sess, "]"), "-", "Calling function", paste0("\"", req.func, "\""), "..."))
 
-	                resp.obj <<- do.call(req.func, as.list(req.args), envir = working.env)
+	                resp.obj <<- do.call(req.func, as.list(req.args), envir=working.env)
+
 	                if(is.logical(resp.obj)) {
 	                    if (resp.obj == FALSE) next
 	                }
 	            }
+
+	            # Save session for next purpose
+		        conn$LPUSH("log", paste(paste(ls(envir=working.env), collapse=' '), "->", session.rdata))
+		        save(working.env, file = session.rdata)
+		        # save(file=session.rdata, envir = working.env)
 
 	        }, error = function(e) {
 	            err.code <<- 1
@@ -110,9 +120,6 @@ while(1) {
 
 	        resp.str <- toJSON(list('session'=req.sess, 'id'=req.id, 'data'=resp.obj, 'success'=as.logical(1-err.code)), auto_unbox=TRUE, force=TRUE)
 	        conn$LPUSH(paste0("resp-", req.id), resp.str)
-
-	        # Save session for next purpose
-	        save(file=session.rdata, envir = working.env)
 	    }
     }, error = function(e) {        
         conn$LPUSH("log", capture.output("error"))

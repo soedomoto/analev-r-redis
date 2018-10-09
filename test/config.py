@@ -1,5 +1,5 @@
-# webdis_url = 'https://simpeg.bps.go.id/analev-r/webdis/proxy'
-webdis_url = 'http://localhost:7379'
+webdis_url = 'https://simpeg.bps.go.id/analev-r/webdis/proxy'
+# webdis_url = 'http://localhost:7379'
 sessions = ['97bfa3b5-cff0-42b7-b1b1-3def6e87cda6', 'c076f175-ddd9-4c35-b52a-1947e92723b0',
             '93e182fe-825b-47e0-91e4-d0d86e2a3d92', 'a09bdfbf-fb94-4b5a-8d97-9b94a7a5202a',
             'e8e5300b-8c47-4778-aeb4-8ddcd6ea88ce', 'b113a8eb-2eff-42d0-9495-e39cc5cefdb6',

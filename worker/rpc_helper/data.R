@@ -26,7 +26,9 @@ data.read <- function(cat.id, var.name) {
     rs <- dbSendQuery(db, paste0('SELECT location, r_handler FROM data_model WHERE id = "', cat.id, '"'))
     row <- dbFetch(rs)
 
-    df <- eval(parse(text=paste(var.name, '<<-', str_replace(row$r_handler, "\\?", paste0('"', row$location, '"')))))
+    df <- eval(parse(text=str_replace(row$r_handler, "\\?", paste0('"', row$location, '"'))))
+    assign(var.name, df, envir=parent.frame(1))
+
     csv <- process.dataframe.to.csv(head(df))
 
     return(csv)
