@@ -1,14 +1,3 @@
-mysql.db <- NULL;
-database.mysql <- function() {
-    library(RMySQL)
-    
-    if (is.null(mysql.db)) {
-        mysql.db <<- dbConnect(MySQL(), user=Sys_getenv("MYSQL_USER", 'root'), password=Sys_getenv("MYSQL_PASSWORD", 'toor'), dbname=Sys_getenv("MYSQL_DATABASE", 'analev'), host=Sys_getenv("MYSQL_HOST", '127.0.0.1'));
-    }
-
-    return(mysql.db);
-}
-
 data.get_catalogues <- function() {
     library(RMySQL)
     

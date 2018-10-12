@@ -19,6 +19,24 @@ script.name <- function() {
 	return(sub(".*=", "", commandArgs()[6]))
 }
 
+mysql.db <- NULL;
+database.mysql <- function() {
+    library(RMySQL)
+    
+    if (is.null(mysql.db)) {
+        user <- Sys_getenv("MYSQL_USER", 'root')
+        password <- Sys_getenv("MYSQL_PASSWORD", 'toor')
+        dbname <- Sys_getenv("MYSQL_DATABASE", 'analev')
+        host <- Sys_getenv("MYSQL_HOST", '127.0.0.1')
+
+        conn$LPUSH("log", paste("Connecting to MySQL ", host, "/", dbname, " using ", user, ":", password))
+
+        mysql.db <<- dbConnect(MySQL(), user=user, password=password, dbname=dbname, host=host);
+    }
+
+    return(mysql.db);
+}
+
 data.path <- function(data.name) {
     data.dir <- Sys.getenv('DATA_DIR', '/data')
     data.file <- normalizePath(file.path(data.dir, data.name))

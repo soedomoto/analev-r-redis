@@ -1,14 +1,3 @@
-mysql.db <- NULL;
-database.mysql <- function() {
-    library(RMySQL)
-    
-    if (is.null(mysql.db)) {
-        mysql.db <<- dbConnect(MySQL(), user=Sys_getenv("MYSQL_USER", 'root'), password=Sys_getenv("MYSQL_PASSWORD", 'toor'), dbname=Sys_getenv("MYSQL_DATABASE", 'analev'), host=Sys_getenv("MYSQL_HOST", '127.0.0.1'));
-    }
-
-    return(mysql.db);
-}
-
 module.all <- function() {
     db <- database.mysql()
     rs <- dbSendQuery(db, 'SELECT m.id, m.name, m.label, m.owner AS owner_id, u.fullname AS owner_name FROM module_model m, user_model u WHERE m.owner = u.id')
